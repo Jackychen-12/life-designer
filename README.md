@@ -1,237 +1,211 @@
-# Life Designer — AI 人生设计师
+# Life Designer
 
 > **不是帮你「想清楚」，是陪你「走出来」。**
 
-一个基于斯坦福 d.school Life Design Lab 方法论的 AI 人生设计教练 Skill。通过多轮深度对话，帮你看清现状、找到真问题、生成三个五年人生版本，最终输出一份 8000-12000 字的《个人人生设计蓝图》。
+你有没有过这种感觉——每天很忙，但不知道在忙什么？能力不差，但看不到五年后的自己？知道该改变，但不知道往哪走？
+
+这个 Skill 就是为这种时刻准备的。
+
+它把斯坦福连续 11 年最受欢迎的课——Life Design Lab——变成了一个 AI 人生设计教练。你不用出门，不用约时间，跟它聊 20-60 分钟，它会陪你走完四个阶段，最后给你一份 8000-12000 字的《个人人生设计蓝图》。
+
+**不是诊断书，不是鸡汤，是一封真正懂你的朋友写给你的长信。**
+
+---
+
+## 它会跟你聊什么
+
+```
+你在这里     →   给健康/工作/娱乐/爱打分，找到真正失衡的地方
+你的指南针   →   你的工作观和人生观在指向同一个方向吗？
+寻路         →   那些让你忘记时间的时刻，藏着你的答案
+多种可能     →   设计三个完全不同的五年人生版本——三个都是 A 计划
+                ↓
+           一份 HTML 蓝图（双击就能打开，暖色调，很好看）
+```
+
+聊完之后你会能回答三个问题：
+- **我的真问题是什么？**（不是你一开始以为的那个）
+- **我有哪三条路可以走？**
+- **明天就能做什么？**
+
+---
+
+## 为什么做这个
+
+网上有很多「人生设计 Prompt」。大部分的问题是一样的——**AI 说话太像 AI 了。**
+
+> 「我理解你的感受。根据分析，你的核心问题是自我实现需求与当前工作价值观之间的不匹配。建议你在日常工作中增加心流体验的比重。」
+
+谁跟朋友这样说话？
+
+这个 Skill 花了大量精力解决一件事：**让 AI 像真人朋友一样跟你聊天。** 温暖、松弛、偶尔一针见血。
+
+我们写了 50+ 条「永远不要这样说」的表达规则：
+
+| AI 的通病 | 它会说的 |
+|-----------|---------|
+| 心理咨询师的客套 | ~~「我理解你的感受」~~ → 「这句话我记住了」 |
+| 分析报告的结构化 | ~~「根据分析，你的核心问题是...」~~ → 「我觉得真正卡住你的可能不是你以为的那件事」 |
+| 空洞的鼓励 | ~~「加油你可以的！」~~ → 「你已经有方向了——只是还没允许自己看见」 |
+
+每个对话阶段都有好/坏回应的逐字对比，详见 [SKILL.md](./SKILL.md)。
+
+---
+
+## 30 秒开始
+
+```bash
+# 1. 克隆
+git clone https://github.com/Jackychen-12/life-designer.git
+
+# 2. 安装到 Claude Code
+cp -r life-designer ~/.qoderwork/skills/life-designer
+
+# 3. 在 Claude Code 里说：
+#    「我迷茫了」
+#    「不知道做什么」
+#    「帮我设计人生」
+#    ……任何触发词都行
+```
+
+**触发词：** 人生设计 / 人生规划 / 我迷茫了 / 不知道做什么 / 职业方向 / 设计我的人生 / 帮我梳理人生 / life design / 帮我想想未来 / 我卡住了 / 不知道该怎么选
+
+---
+
+## 你会得到什么
+
+对话结束后，AI 会生成一份 HTML 文件。双击打开，长这样：
+
+```
+┌──────────────────────────────────────────────┐
+│  LIFE DESIGN BLUEPRINT                       │
+│  个人人生设计蓝图                             │
+│                                              │
+│  01  你在这里                                │
+│      健康 7/10  工作 5/10  娱乐 3/10  爱 7/10 │
+│                                              │
+│  02  真问题                                  │
+│      你以为的 → 重力问题 → 真问题 → 错误前提  │
+│                                              │
+│  03  你的指南针                               │
+│      工作观 ←——→ 人生观                      │
+│                                              │
+│  04  你的能量地图                             │
+│      心流时刻 / 回血活动 / 擅长但耗能 / 偏向   │
+│                                              │
+│  05  三个奥德赛计划                           │
+│      A 延续当下  B 另一条路  C 无限可能       │
+│                                              │
+│  06  原型行动清单                             │
+│      谈 / 试 / 走 / 醒                       │
+│                                              │
+│  07  失败免疫                                │
+│      「你有三个版本可以试。走不通就换。」      │
+└──────────────────────────────────────────────┘
+```
+
+暖色调、Serif 字体、极简留白。不是冰冷的报告，更像一封写给你的信。
 
 ---
 
 ## 灵感来源
 
-本项目灵感来自公众号「数字生命卡兹克」的文章《我把斯坦福最火的一门课，做成了Prompt来帮我设计人生》。文章介绍了如何将 Bill Burnett & Dave Evans 在斯坦福开设的 Life Design 课程设计成 AI Prompt。本项目在此基础上进行了大幅扩展：
+来自公众号「数字生命卡兹克」的文章《我把斯坦福最火的一门课，做成了Prompt来帮我设计人生》。我们在那篇文章的基础上做了这些：
 
-- 融入 6 大理论体系（心流、PERMA、黄金圈、无限游戏、成长型思维等）
-- 设计了完整的四阶段深度对话流程
-- **语言风格指南** — 50+ 条禁用表达 + 自然替代方案，确保对话像真人朋友而非 AI 分析
-- **情感共鸣引擎** — 镜像效应、矛盾揭示、正常化等 6 个机制
-- **完整对话示范** — 每个阶段的好/坏对话对比，展示理想的情感弧度和追问深度
-- 输出精美的 HTML 格式人生设计蓝图
-- **报告生成脚本** — Python 脚本将对话数据自动填入 HTML 模板
-- **对话状态追踪器** — 追踪对话进度，确保不跳步骤、不遗漏追问
-- 涵盖 20+ 本核心参考书目的理论支撑
+- 融入 6 大理论体系，涵盖 20+ 本参考书
+- 写了完整的四阶段对话流程 + 每阶段的好/坏对话示范
+- 加了 50+ 条语言禁用规则，解决 AI 说话太机器的问题
+- 做了情感共鸣引擎——让对话真的打到心里
+- 写了报告生成脚本和对话追踪脚本
+- 输出精美的 HTML 蓝图
 
-## 理论基础
-
-| 理论体系 | 核心书目 | 作者 |
-|---------|---------|------|
-| 设计思维人生方法论 | *Designing Your Life* | Bill Burnett & Dave Evans |
-| 心流理论 | *Flow* | Mihaly Csikszentmihalyi |
-| 积极心理学 PERMA | *Flourish* | Martin Seligman |
-| 黄金圈 & 无限游戏 | *Start with Why* / *The Infinite Game* | Simon Sinek |
-| 成长型思维 | *Mindset* | Carol Dweck |
-| 意义感与选择 | *Man's Search for Meaning* | Viktor Frankl |
-
-## 快速开始
-
-### 前置要求
-
-- [Claude Code](https://claude.ai/code) CLI 工具已安装
-- 终端环境可正常使用
-
-### 安装
-
-```bash
-# 克隆仓库
-git clone https://github.com/Jackychen-12/life-designer.git
-
-# 将 skill 安装到 Claude Code 的 skills 目录
-cp -r life-designer ~/.qoderwork/skills/life-designer
-```
-
-### 使用
-
-在 Claude Code 中，使用以下触发词启动对话：
-
-```
-人生设计
-人生规划
-我迷茫了
-不知道做什么
-职业方向
-设计我的人生
-帮我梳理人生
-life design
-帮我想想未来
-我卡住了
-不知道该怎么选
-```
-
-### 对话流程
-
-```
-Phase 1: 你在这里（看清现状）
-  ↓ 仪表盘打分 + 找到真问题
-Phase 2: 你的指南针（校准方向）
-  ↓ 工作观 + 人生观一致性检验
-Phase 3: 寻路（发现能量模式）
-  ↓ 心流时刻挖掘 + 能量公式
-Phase 4: 多种可能（设计未来）
-  ↓ 奥德赛计划 + 原型行动
-  ↓
-输出：《个人人生设计蓝图》(HTML)
-```
+---
 
 ## 项目结构
 
 ```
 life-designer/
-├── SKILL.md                        # Skill 定义文档（v3.0）— 核心
-├── README.md                       # 本文件
-├── LICENSE                         # MIT 许可证
+├── SKILL.md                    # 核心文件：786 行 Skill 定义
+├── README.md                   # 你正在看的这个
+├── LICENSE                     # MIT
 ├── assets/
-│   └── report-template.html        # HTML 报告模板（995 行，含占位符）
+│   └── report-template.html    # HTML 报告模板
 ├── scripts/
-│   ├── report_generator.py         # 报告生成器：JSON → HTML
-│   └── dialogue_tracker.py         # 对话状态追踪器：追踪阶段和进度
+│   ├── report_generator.py     # JSON → HTML 报告生成器
+│   └── dialogue_tracker.py     # 对话阶段追踪器
 └── references/
-    └── talk_examples.md            # 完整对话示范（从头到尾）
+    └── talk_examples.md        # 完整对话示范（从头到尾）
 ```
 
-## 输出示例
+---
 
-对话结束后，你将获得一份 HTML 格式的《个人人生设计蓝图》，包含 7 个章节：
-
-1. **你在这里** — 四维度仪表盘解读
-2. **真问题** — 思维误区 → 重新定义
-3. **你的指南针** — 工作观 + 人生观一致性诊断
-4. **你的能量地图** — 心流活动 + 能量公式
-5. **三个奥德赛计划** — 三个平等的五年人生版本
-6. **原型行动清单** — 本周就能开始的最小行动
-7. **失败免疫** — 人生是无限游戏
-
-## 核心设计理念
-
-### 语言第一
-
-这个 Skill 和其他 Prompt 最大的区别在于 **语言质量**。AI 最常见的通病是：
-
-- 像心理咨询师一样客套（「我理解你的感受」「感谢你的分享」）
-- 像分析报告一样结构化（「根据分析，你的核心问题是...」）
-- 像鸡汤一样空洞（「加油，你可以的！」）
-
-我们在 SKILL.md 中加入了 **50+ 条禁用表达 + 自然替代方案**，确保对话像真人朋友在喝咖啡聊天——温暖、犀利、偶尔一针见血。
-
-详见 [SKILL.md](./SKILL.md) 第 1.4 节「语言风格指南」。
-
-### 六条核心信念
-
-1. **人生是设计问题，没有唯一正解** — 它需要大量尝试、做原型、边走边看
-2. **重新定义问题** — 很多人卡住不是没有答案，是在回答错误的问题
-3. **接受重力问题** — 无法改变的现实不是问题，是现实
-4. **数量本身含有质量** — 先逼出足够多可能性再挑
-5. **激情是结果而非前提** — 靠做原型去试，激情是副产品
-6. **人生是无限游戏** — 没有输赢，每次失败都在缩小搜索范围
-
-### 共鸣引擎
-
-这个 Skill 不只是信息收集，而是一次情感体验：
-
-- **镜像效应** — 在报告中引用用户原话
-- **矛盾揭示** — 温柔指出言行矛盾
-- **正常化** — 让用户知道他的感受是正常的
-- **具体化** — 用具体的故事回应，而非抽象建议
-- **赋权结尾** — 让人安心，不是催人行动
-
-## 脚本使用
+## 脚本工具
 
 ### 报告生成器
 
-对话结束后，将对话数据整理为 JSON，自动填入 HTML 模板生成蓝图：
+对话结束后，AI 把对话内容整理成 JSON，这个脚本帮你填入 HTML 模板：
 
 ```bash
-# 基本用法
 python3 scripts/report_generator.py --input conversation.json
-
-# 指定输出路径
-python3 scripts/report_generator.py --input conversation.json --output blueprint.html
-
-# 指定模板路径
-python3 scripts/report_generator.py --input conversation.json --template assets/report-template.html
 ```
 
-JSON 数据示例：
-```json
-{
-  "USER_NAME": "小明",
-  "DATE": "2026年7月8日",
-  "HEALTH_SCORE": "7",
-  "HEALTH_NOTE": "身体还行，但睡眠质量不太好",
-  "WORK_SCORE": "5",
-  "WORK_NOTE": "工作不差但缺乏意义感",
-  "PLAY_SCORE": "3",
-  "LOVE_SCORE": "7",
-  "PLAN_A_TITLE": "继续深耕，争取管理岗",
-  "PLAN_A_TIMELINE": "第一年...第二年...",
-  "PLAN_B_TITLE": "做一款小而美的产品",
-  "PLAN_C_TITLE": "产品创作者 + 教育者"
-}
-```
+### 对话追踪器
 
-### 对话状态追踪器
-
-追踪对话进度，确保四阶段十步骤全部覆盖：
+确保对话走完四阶段十步骤，不跳步不遗漏：
 
 ```bash
-# 初始化
-python3 scripts/dialogue_tracker.py --action init --json '{"user_name":"小明"}'
-
-# 查看当前步骤
+python3 scripts/dialogue_tracker.py --action init
 python3 scripts/dialogue_tracker.py --action next
-
-# 完成当前步骤
-python3 scripts/dialogue_tracker.py --action complete --json '{"step":"1.1","note":"健康6分，娱乐3分最低"}'
-
-# 查看进度
+python3 scripts/dialogue_tracker.py --action complete --json '{"step":"1.1"}'
 python3 scripts/dialogue_tracker.py --action status
 ```
 
-## 参考书目
+---
 
-完整参考体系包含 20+ 本书籍和 13 个实践工具框架，详见 [SKILL.md](./SKILL.md) 第九章。
+## 理论基础
 
-### 核心 9 本
+| 理论 | 核心书目 | 作者 |
+|-----|---------|------|
+| 设计思维 | *Designing Your Life* | Bill Burnett & Dave Evans |
+| 心流 | *Flow* | Mihaly Csikszentmihalyi |
+| 积极心理学 | *Flourish* | Martin Seligman |
+| 黄金圈 / 无限游戏 | *Start with Why* / *The Infinite Game* | Simon Sinek |
+| 成长型思维 | *Mindset* | Carol Dweck |
+| 意义感 | *Man's Search for Meaning* | Viktor Frankl |
 
-| 书名 | 作者 |
-|------|------|
-| *Designing Your Life* | Bill Burnett & Dave Evans |
-| *Designing Your New Work Life* | Bill Burnett & Dave Evans |
-| *Flow* | Mihaly Csikszentmihalyi |
-| *Authentic Happiness* | Martin Seligman |
-| *Flourish* | Martin Seligman |
-| *Start with Why* | Simon Sinek |
-| *The Infinite Game* | Simon Sinek |
-| *Mindset* | Carol Dweck |
-| *Man's Search for Meaning* | Viktor Frankl |
+完整 20+ 本参考书目和 13 个实践工具框架，见 [SKILL.md](./SKILL.md) 第九章。
 
-### 深度补充 15 本
+---
 
-*Range*, *The Pathless Path*, *Transitions*, *The Art of Possibility*, *Atomic Habits*, *So Good They Can't Ignore You*, *Essentialism*, *The Second Mountain*, *Four Thousand Weeks*, *Ikigai*, *The Design of Everyday Things*, *Thinking, Fast and Slow*, *Grit*, *The Courage to Be Disliked*, *Finding Flow*
+## 六条信念
 
-## 贡献
+1. 人生是设计问题，没有唯一正解
+2. 重新定义问题——你卡住可能是在回答错误的问题
+3. 接受重力问题——改变不了的现实不是问题，是现实
+4. 先逼出足够多可能性再挑
+5. 激情是好设计带来的副产品，不是前提
+6. 人生是无限游戏，没有输赢
 
-欢迎提交 Issue 和 PR：
+---
 
-- 改进对话流程和追问技巧
-- 补充新的理论参考
-- 优化 HTML 报告模板
-- 修复 Bug
+## 想参与？
+
+欢迎 PR 和 Issue。可以做的事：
+
+- 改善对话追问技巧（SKILL.md 里的对话示范）
+- 补充新的理论参考和书目
+- 优化 HTML 报告模板的视觉效果
+- 增加多语言支持
+- 把对话示范做得更丰富
+
+---
 
 ## 致谢
 
-- **Bill Burnett & Dave Evans** — Stanford Life Design Lab 创始人，*Designing Your Life* 作者
-- **数字生命卡兹克** — 原始灵感和文章来源
-- **Stanford d.school** — 设计思维方法论的发源地
+- **Bill Burnett & Dave Evans** — 斯坦福 Life Design Lab 创始人
+- **数字生命卡兹克** — 原始灵感来源
+- **Stanford d.school** — 设计思维的发源地
 
 ## License
 
-MIT License - 详见 [LICENSE](./LICENSE)
+MIT — 随便用。详见 [LICENSE](./LICENSE)
