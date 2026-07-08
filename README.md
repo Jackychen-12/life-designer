@@ -12,8 +12,12 @@
 
 - 融入 6 大理论体系（心流、PERMA、黄金圈、无限游戏、成长型思维等）
 - 设计了完整的四阶段深度对话流程
-- 增加了情感共鸣引擎（镜像效应、矛盾揭示、正常化等 6 个机制）
+- **语言风格指南** — 50+ 条禁用表达 + 自然替代方案，确保对话像真人朋友而非 AI 分析
+- **情感共鸣引擎** — 镜像效应、矛盾揭示、正常化等 6 个机制
+- **完整对话示范** — 每个阶段的好/坏对话对比，展示理想的情感弧度和追问深度
 - 输出精美的 HTML 格式人生设计蓝图
+- **报告生成脚本** — Python 脚本将对话数据自动填入 HTML 模板
+- **对话状态追踪器** — 追踪对话进度，确保不跳步骤、不遗漏追问
 - 涵盖 20+ 本核心参考书目的理论支撑
 
 ## 理论基础
@@ -38,7 +42,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/YOUR_USERNAME/life-designer.git
+git clone https://github.com/Jackychen-12/life-designer.git
 
 # 将 skill 安装到 Claude Code 的 skills 目录
 cp -r life-designer ~/.qoderwork/skills/life-designer
@@ -81,11 +85,16 @@ Phase 4: 多种可能（设计未来）
 
 ```
 life-designer/
-├── SKILL.md                    # Skill 定义文档（v3.0）
-├── README.md                   # 本文件
-├── LICENSE                     # MIT 许可证
-└── assets/
-    └── report-template.html    # HTML 报告模板
+├── SKILL.md                        # Skill 定义文档（v3.0）— 核心
+├── README.md                       # 本文件
+├── LICENSE                         # MIT 许可证
+├── assets/
+│   └── report-template.html        # HTML 报告模板（995 行，含占位符）
+├── scripts/
+│   ├── report_generator.py         # 报告生成器：JSON → HTML
+│   └── dialogue_tracker.py         # 对话状态追踪器：追踪阶段和进度
+└── references/
+    └── talk_examples.md            # 完整对话示范（从头到尾）
 ```
 
 ## 输出示例
@@ -101,6 +110,18 @@ life-designer/
 7. **失败免疫** — 人生是无限游戏
 
 ## 核心设计理念
+
+### 语言第一
+
+这个 Skill 和其他 Prompt 最大的区别在于 **语言质量**。AI 最常见的通病是：
+
+- 像心理咨询师一样客套（「我理解你的感受」「感谢你的分享」）
+- 像分析报告一样结构化（「根据分析，你的核心问题是...」）
+- 像鸡汤一样空洞（「加油，你可以的！」）
+
+我们在 SKILL.md 中加入了 **50+ 条禁用表达 + 自然替代方案**，确保对话像真人朋友在喝咖啡聊天——温暖、犀利、偶尔一针见血。
+
+详见 [SKILL.md](./SKILL.md) 第 1.4 节「语言风格指南」。
 
 ### 六条核心信念
 
@@ -120,6 +141,59 @@ life-designer/
 - **正常化** — 让用户知道他的感受是正常的
 - **具体化** — 用具体的故事回应，而非抽象建议
 - **赋权结尾** — 让人安心，不是催人行动
+
+## 脚本使用
+
+### 报告生成器
+
+对话结束后，将对话数据整理为 JSON，自动填入 HTML 模板生成蓝图：
+
+```bash
+# 基本用法
+python3 scripts/report_generator.py --input conversation.json
+
+# 指定输出路径
+python3 scripts/report_generator.py --input conversation.json --output blueprint.html
+
+# 指定模板路径
+python3 scripts/report_generator.py --input conversation.json --template assets/report-template.html
+```
+
+JSON 数据示例：
+```json
+{
+  "USER_NAME": "小明",
+  "DATE": "2026年7月8日",
+  "HEALTH_SCORE": "7",
+  "HEALTH_NOTE": "身体还行，但睡眠质量不太好",
+  "WORK_SCORE": "5",
+  "WORK_NOTE": "工作不差但缺乏意义感",
+  "PLAY_SCORE": "3",
+  "LOVE_SCORE": "7",
+  "PLAN_A_TITLE": "继续深耕，争取管理岗",
+  "PLAN_A_TIMELINE": "第一年...第二年...",
+  "PLAN_B_TITLE": "做一款小而美的产品",
+  "PLAN_C_TITLE": "产品创作者 + 教育者"
+}
+```
+
+### 对话状态追踪器
+
+追踪对话进度，确保四阶段十步骤全部覆盖：
+
+```bash
+# 初始化
+python3 scripts/dialogue_tracker.py --action init --json '{"user_name":"小明"}'
+
+# 查看当前步骤
+python3 scripts/dialogue_tracker.py --action next
+
+# 完成当前步骤
+python3 scripts/dialogue_tracker.py --action complete --json '{"step":"1.1","note":"健康6分，娱乐3分最低"}'
+
+# 查看进度
+python3 scripts/dialogue_tracker.py --action status
+```
 
 ## 参考书目
 
