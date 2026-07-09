@@ -83,7 +83,7 @@ cp -r life-designer ~/.qoderwork/skills/life-designer
 │                                              │
 │  01  你在这里                                │
 │      健康 7/10  工作 5/10  娱乐 3/10  爱 7/10 │
-│      + SVG 雷达图（自动生成）                 │
+│      + 四段彩色进度条（自动生成）             │
 │                                              │
 │  ✦  对话金句卡                               │
 │     「我像个跑步机——跑得很快但原地不动」      │
@@ -111,7 +111,7 @@ cp -r life-designer ~/.qoderwork/skills/life-designer
 └──────────────────────────────────────────────┘
 ```
 
-暖色调、Serif 字体、极简留白。三个惊喜元素：对话金句卡、SVG 雷达图、给未来的信。
+暖色调、Serif 字体、极简留白。三个惊喜元素：对话金句卡、四段彩色进度条、给未来的信。
 
 ---
 
@@ -132,18 +132,18 @@ cp -r life-designer ~/.qoderwork/skills/life-designer
 
 ```
 life-designer/
-├── SKILL.md                        # 核心文件：Skill 定义（800+ 行）
+├── SKILL.md                        # 核心文件：Skill 定义（1000+ 行）
 ├── README.md                       # 你正在看的这个
 ├── LICENSE                         # MIT
-├── assets/
-│   └── report-template-v1.html     # v1 占位符模板（已归档，v2 由脚本动态生成）
 ├── scripts/
-│   ├── report_generator.py         # v2 报告生成器：富文本 JSON → 精美 HTML
+│   ├── report_generator.py         # 报告生成器：富文本 JSON → 精美 HTML + Markdown
+│   ├── markdown_generator.py       # Markdown 报告生成器
 │   └── dialogue_tracker.py         # 对话阶段追踪器
 ├── references/
 │   └── talk_examples.md            # 完整对话示范（从头到尾）
 └── output/
-    └── demo-report.html            # 运行 --demo 生成的示例报告
+    ├── demo-report.html            # 运行 --demo 生成的示例报告
+    └── demo-report.md              # Markdown 版本
 ```
 
 ---
@@ -152,21 +152,24 @@ life-designer/
 
 ### 报告生成器（v2）
 
-对话结束后，AI 把对话内容整理为富文本 JSON，脚本自动渲染成精美 HTML：
+对话结束后，AI 把对话内容整理为富文本 JSON，脚本自动渲染成精美 HTML 和 Markdown 双版本：
 
 ```bash
-# 从 JSON 生成报告
+# 从 JSON 生成 HTML + Markdown 报告
 python3 scripts/report_generator.py --input conversation.json
+
+# 单独生成 Markdown 版本
+python3 scripts/markdown_generator.py --input conversation.json
 
 # 生成示范报告（看看效果）
 python3 scripts/report_generator.py --demo
 ```
 
-**v2 架构的核心变化：** 不再是「填占位符」，而是「AI 写富文本，脚本做排版」。每个章节都有一个 `narrative` 字段——AI 在这里自由写作深度叙事，不被格子限制。
+**核心架构：**「AI 写富文本，脚本做排版」。每个章节都有一个 `narrative` 字段——AI 在这里自由写作深度叙事，不被格子限制。HTML 版本带交互效果（奥德赛计划点击展开），Markdown 版本可直接导入 Obsidian / Logseq / VS Code。
 
-新增惊喜元素：
+惊喜元素：
 - **对话金句卡** — 从对话中选出最有力的一句话，渲染成精美卡片
-- **SVG 雷达图** — 根据四维度分数自动生成可视化
+- **四段彩色进度条** — 根据四维度分数自动生成可视化（健康/工作/娱乐/爱）
 - **给未来的信** — 用用户视角写给 6 个月后的自己
 
 ### 对话追踪器

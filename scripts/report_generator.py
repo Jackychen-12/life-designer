@@ -15,7 +15,9 @@ import json
 import sys
 import os
 import argparse
-from datetime import datetime
+import hashlib
+import subprocess
+from datetime import datetime, timedelta
 
 # ============================================================
 # 颜色常量（与 CSS 变量一致）
@@ -29,23 +31,11 @@ COLORS = {
     'warm': '#7D6B52',
 }
 
-PLAN_COLORS = {
-    'A': COLORS['accent'],
-    'B': COLORS['green'],
-    'C': COLORS['blue'],
-}
-
-PLAN_LABELS = {
-    'A': 'VERSION A — 延续当下',
-    'B': 'VERSION B — 另一条路',
-    'C': 'VERSION C — 无限可能',
-}
-
 DIM_META = {
-    'health': {'label': '健康', 'color': COLORS['green'], 'hint': '身体·情绪·心理'},
-    'work':   {'label': '工作', 'color': COLORS['accent'], 'hint': '认同感·意义感'},
-    'play':   {'label': '娱乐', 'color': COLORS['blue'], 'hint': '纯粹的快乐'},
-    'love':   {'label': '爱',   'color': COLORS['warm'], 'hint': '双向的连接'},
+    'health':  {'label': '健康', 'color': '#5A8A62', 'hint': '身体·情绪·心理'},
+    'work':    {'label': '工作', 'color': '#C86A4A', 'hint': '认同感·意义感'},
+    'play':    {'label': '娱乐', 'color': '#4A7A9C', 'hint': '纯粹的快乐'},
+    'love':    {'label': '爱',   'color': '#7D6B52', 'hint': '双向的连接'},
 }
 
 # ============================================================
@@ -53,1255 +43,1725 @@ DIM_META = {
 # ============================================================
 
 def build_css():
-    """构建完整的 CSS 样式表"""
+    """构建完整的 CSS 样式表（style-c 禅意基调）"""
     return '''
 :root {
   --bg: #FAFAF8;
-  --bg-alt: #F5F0EB;
-  --bg-panel: #FFFFFF;
-  --bg-code: #F0EDE8;
-  --bg-hover: #EFEBE5;
-  --ink: #1A1A18;
-  --ink-80: #2A2A28;
-  --ink-60: #555249;
-  --ink-40: #8B867E;
-  --ink-20: #B0ACA4;
-  --ink-10: #CBC7C0;
-  --ink-05: #E0DCD6;
-  --accent: #C86A4A;
-  --accent-deep: #A85238;
-  --accent-glow: rgba(200, 106, 74, 0.12);
-  --accent-soft: rgba(200, 106, 74, 0.06);
-  --accent-border: rgba(200, 106, 74, 0.22);
-  --green: #5A8A62;
-  --green-soft: rgba(90, 138, 98, 0.06);
-  --green-border: rgba(90, 138, 98, 0.22);
-  --warm: #7D6B52;
-  --warm-soft: rgba(125, 107, 82, 0.06);
-  --warm-border: rgba(125, 107, 82, 0.22);
-  --blue: #4A7A9C;
-  --blue-soft: rgba(74, 122, 156, 0.06);
-  --blue-border: rgba(74, 122, 156, 0.22);
-  --hairline: rgba(0, 0, 0, 0.08);
-  --hairline-strong: rgba(0, 0, 0, 0.12);
-  --serif: "Noto Serif SC", "Source Serif 4", Georgia, serif;
-  --sans: "Inter", -apple-system, "PingFang SC", system-ui, sans-serif;
-  --ease: cubic-bezier(.2,.8,.2,1);
+  --ink: #1A1A1A;
+  --ink-2: #2A2A28;
+  --stone: #6B6B6B;
+  --mist: #B8B4AC;
+  --paper: #F0EDE6;
+  --paper-2: #E8E4DA;
+  --accent: #2B4C7E;
+  --accent-soft: #D4DFEB;
+  --accent-line: rgba(43, 76, 126, 0.18);
+  --rule: #D8D4CC;
+  --rule-hair: #E5E1D9;
+  --serif: 'Noto Serif SC', 'Source Serif 4', serif;
+  --sans: 'Noto Sans SC', 'Inter', sans-serif;
+  --mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: var(--sans);
   background: var(--bg);
   color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 300;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
   -webkit-font-smoothing: antialiased;
+}
+
+/* 纸质噪点纹理 —— style-c 灵魂之一 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* ─── MASTHEAD ─── */
+.masthead {
+  padding: 48px 0 36px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.masthead-left {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--stone);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+.masthead-right {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--mist);
+  text-align: right;
+  letter-spacing: 0.1em;
   line-height: 1.6;
 }
 
-::selection {
-  background: var(--accent-glow);
-  color: var(--accent-deep);
+/* ─── HERO ─── */
+.hero {
+  padding: 64px 0 48px;
+  text-align: center;
 }
-
-.container {
-  max-width: 780px;
+.hero-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.hero-title {
+  font-family: var(--serif);
+  font-size: 2.4rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+}
+.hero-subtitle {
+  font-size: 1rem;
+  color: var(--stone);
+  font-weight: 400;
+  max-width: 440px;
   margin: 0 auto;
-  padding: 60px 40px 80px;
+  line-height: 1.75;
+}
+.hero-meta {
+  margin-top: 32px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--mist);
+  letter-spacing: 0.1em;
 }
 
-/* ===== Header ===== */
-.report-header {
-  margin-bottom: 48px;
-  padding-bottom: 32px;
-  border-bottom: 1px solid var(--hairline);
+/* ─── DIVIDER ─── */
+.divider {
+  width: 40px;
+  height: 1px;
+  background: var(--rule);
+  margin: 40px auto;
+}
+.divider-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--mist);
+  margin: 40px auto;
 }
 
-.report-header .label {
-  font-size: 11px;
+/* ─── SECTION ─── */
+.section {
+  padding: 32px 0;
+}
+.section-number {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.2em;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+.section-body {
+  font-size: 1rem;
+  color: var(--ink);
+  line-height: 1.8;
+}
+.section-body p {
+  margin-bottom: 1em;
+}
+.section-body strong { font-weight: 500; color: var(--ink-2); }
+.section-body em { font-style: italic; color: var(--stone); }
+
+/* 章节题记（P1 新增：section 标题下的用户原话） */
+.section-epigraph {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--stone);
+  border-left: 1px solid var(--accent-line);
+  padding: 4px 0 4px 18px;
+  margin: -4px 0 20px 0;
+  line-height: 1.7;
+  max-width: 560px;
+}
+.section-epigraph .attr {
+  display: block;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+/* ─── KPI STRIP ─── */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  margin: 28px 0 12px;
+}
+.kpi {
+  padding: 28px 12px;
+  text-align: center;
+  border-right: 1px solid var(--rule);
+}
+.kpi:last-child { border-right: none; }
+.kpi-value {
+  font-family: var(--mono);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.kpi-value::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--kpi-color, var(--accent));
+  margin-right: 6px;
+  vertical-align: middle;
+  position: relative;
+  top: -2px;
+}
+.kpi-label {
+  font-family: var(--serif);
+  font-size: 0.8rem;
+  color: var(--stone);
+  letter-spacing: 0.08em;
+}
+
+/* KPI 注解（P1 新增：每个分数下一句 mono 小字） */
+.kpi-notes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--rule-hair);
+}
+.kpi-note {
+  padding: 12px 16px 20px;
+  border-right: 1px solid var(--rule-hair);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  line-height: 1.7;
+  color: var(--stone);
+  text-align: center;
+}
+.kpi-note:last-child { border-right: none; }
+
+/* ─── INSIGHT (简约内联) ─── */
+.insight-card {
+  margin: 20px 0;
+  padding: 0;
+}
+.insight-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--stone);
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
   font-weight: 500;
-  letter-spacing: 2px;
+}
+.insight-text {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: var(--ink-2);
+}
+
+/* ─── PULL QUOTE ─── */
+.pull-quote {
+  padding: 32px 0;
+  text-align: center;
+}
+.pull-quote-mark {
+  font-family: var(--serif);
+  font-size: 3rem;
+  color: var(--accent-soft);
+  line-height: 1;
+  margin-bottom: -12px;
+}
+.pull-quote-text {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 0 auto;
+  color: var(--ink);
+}
+.pull-quote-source {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--mist);
+  letter-spacing: 0.1em;
+}
+
+/* ─── SCORE BARS ─── */
+.score-bars {
+  margin: 24px 0 8px;
+}
+.score-bar {
+  display: grid;
+  grid-template-columns: 48px 1fr 36px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+}
+.score-bar-label {
+  font-family: var(--serif);
+  font-size: 0.88rem;
+  color: var(--ink);
+  font-weight: 500;
+}
+.score-bar-track {
+  height: 4px;
+  background: var(--rule-hair);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.score-bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+.score-bar-val {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--stone);
+  text-align: right;
+}
+
+/* ─── REFRAME 四步对照（P1 新增） ─── */
+.reframe-grid {
+  margin: 24px 0;
+  padding: 24px 28px;
+  background: var(--paper);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1.9;
+}
+.reframe-row {
+  display: grid;
+  grid-template-columns: 130px 20px 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 4px 0;
+}
+.reframe-key {
+  color: var(--mist);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+.reframe-arrow {
   color: var(--accent);
+  text-align: center;
+}
+.reframe-val {
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+.reframe-val.real { font-weight: 500; color: var(--accent); }
+
+/* ─── COMPASS 罗盘对齐（P1 增强） ─── */
+.compass-pair {
+  display: grid;
+  grid-template-columns: 1fr 20px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin: 24px 0 16px;
+  padding: 24px 0;
+  border-top: 1px solid var(--rule-hair);
+  border-bottom: 1px solid var(--rule-hair);
+}
+.compass-cell { text-align: center; padding: 0 8px; }
+.compass-cell-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   margin-bottom: 12px;
 }
-
-.report-header h1 {
+.compass-cell-text {
   font-family: var(--serif);
-  font-size: 32px;
-  font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1.8;
   color: var(--ink);
-  letter-spacing: -0.02em;
-  line-height: 1.3;
-  margin-bottom: 8px;
 }
-
-.report-header .subtitle {
-  font-size: 14px;
-  color: var(--ink-40);
-  font-weight: 300;
-}
-
-.report-header .meta {
-  margin-top: 16px;
-  display: flex;
-  gap: 20px;
-  font-size: 12px;
-  color: var(--ink-40);
-}
-
-.accent-line {
-  width: 32px;
-  height: 1.5px;
-  background: var(--accent);
-  margin-top: 16px;
-  opacity: 0.7;
-}
-
-/* ===== Section ===== */
-.section {
-  margin-bottom: 56px;
-}
-
-.section-number {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 1.5px;
+.compass-connector {
+  font-family: var(--mono);
   color: var(--accent);
-  margin-bottom: 8px;
-}
-
-.section h2 {
-  font-family: var(--serif);
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 24px;
-  letter-spacing: -0.01em;
-  padding-left: 16px;
-  position: relative;
-  line-height: 1.3;
-}
-
-.section h2::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 3px;
-  bottom: 3px;
-  width: 3px;
-  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-deep) 100%);
-  border-radius: 2px;
-}
-
-.section h3 {
-  font-family: var(--serif);
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--ink-80);
-  margin-top: 32px;
-  margin-bottom: 14px;
-}
-
-.section p {
-  font-size: 14px;
-  line-height: 1.9;
-  color: var(--ink-60);
-  margin-bottom: 16px;
-}
-
-.section strong { color: var(--ink); font-weight: 600; }
-.section em { color: var(--accent-deep); font-style: italic; }
-
-/* ===== Dashboard ===== */
-.dashboard {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin: 28px 0;
-}
-
-.dashboard-item {
-  background: var(--bg-panel);
-  border: 1px solid var(--hairline);
-  border-radius: 3px;
-  padding: 18px 22px;
-  transition: all 0.25s var(--ease);
-}
-
-.dashboard-item:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transform: translateY(-1px);
-}
-
-.dim-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  color: var(--ink-40);
-  margin-bottom: 4px;
-}
-
-.dim-hint {
-  font-size: 10px;
-  color: var(--ink-20);
-  margin-bottom: 8px;
-}
-
-.dim-score {
-  font-family: var(--serif);
-  font-size: 30px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 4px;
-}
-
-.dim-score span {
-  font-size: 14px;
-  color: var(--ink-20);
-  font-weight: 400;
-}
-
-.dim-bar {
-  height: 3px;
-  background: var(--ink-05);
-  border-radius: 2px;
-  margin-top: 10px;
-  overflow: hidden;
-}
-
-.dim-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.8s var(--ease);
-}
-
-.dim-note {
-  font-size: 12px;
-  color: var(--ink-40);
-  margin-top: 10px;
-  line-height: 1.7;
-}
-
-/* ===== Rich Content ===== */
-.narrative {
-  font-size: 14px;
-  line-height: 1.95;
-  color: var(--ink-60);
-  margin: 20px 0;
-}
-
-.narrative p {
-  margin-bottom: 16px;
-}
-
-.narrative p:last-child {
-  margin-bottom: 0;
-}
-
-blockquote {
-  border-left: 2.5px solid var(--accent);
-  padding: 16px 22px;
-  margin: 24px 0;
-  color: var(--ink-60);
-  font-size: 13.5px;
-  line-height: 1.85;
-  font-style: italic;
-  background: var(--accent-soft);
-  border-radius: 0 3px 3px 0;
-}
-
-blockquote p { margin-bottom: 8px; color: var(--ink-60); }
-blockquote p:last-child { margin-bottom: 0; }
-
-/* ===== Quote Card（对话金句卡） ===== */
-.quote-card {
-  background: linear-gradient(135deg, #FAF5F0 0%, #F5EDE5 100%);
-  border: 1px solid var(--accent-border);
-  border-radius: 6px;
-  padding: 32px 36px;
-  margin: 32px 0;
-  position: relative;
   text-align: center;
+  font-size: 1.2rem;
 }
-
-.quote-card::before {
-  content: '\\201C';
-  font-family: var(--serif);
-  font-size: 72px;
+.compass-verdict {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
   color: var(--accent);
-  opacity: 0.15;
-  position: absolute;
-  top: 8px;
-  left: 24px;
-  line-height: 1;
+  margin-top: 4px;
 }
 
-.quote-card .quote-text {
-  font-family: var(--serif);
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--ink);
-  line-height: 1.7;
-  margin-bottom: 16px;
-  position: relative;
-  z-index: 1;
-}
-
-.quote-card .quote-context {
-  font-size: 12px;
-  color: var(--ink-40);
-  font-style: italic;
-}
-
-.quote-card .quote-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  color: var(--accent);
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-
-/* ===== Reframe Card ===== */
-.reframe-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--hairline);
-  border-left: 3px solid var(--accent);
-  border-radius: 3px;
-  padding: 22px 26px;
-  margin: 24px 0;
-}
-
-.reframe-row {
-  display: flex;
-  gap: 14px;
-  margin-bottom: 14px;
-  align-items: flex-start;
-}
-
-.reframe-row:last-child { margin-bottom: 0; }
-
-.reframe-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  color: var(--ink-40);
-  min-width: 80px;
-  padding-top: 2px;
-  flex-shrink: 0;
-}
-
-.reframe-value {
-  font-size: 13.5px;
-  color: var(--ink-60);
-  line-height: 1.75;
-}
-
-.reframe-value.highlight {
-  color: var(--accent-deep);
-  font-weight: 500;
-}
-
-/* ===== Compass ===== */
-.compass {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin: 28px 0;
-}
-
-.compass-item {
-  background: var(--bg-panel);
-  border: 1px solid var(--hairline);
-  border-radius: 3px;
-  padding: 22px;
-  transition: all 0.25s var(--ease);
-}
-
-.compass-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-.compass-item:nth-child(1) { border-top: 2.5px solid var(--accent); }
-.compass-item:nth-child(2) { border-top: 2.5px solid var(--green); }
-
-.compass-title {
-  font-family: var(--serif);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--hairline);
-}
-
-.compass-text {
-  font-size: 13px;
-  color: var(--ink-60);
-  line-height: 1.85;
-}
-
-/* ===== Radar Chart (SVG) ===== */
-.radar-container {
-  display: flex;
-  justify-content: center;
-  margin: 32px 0;
-}
-
-.radar-container svg {
-  max-width: 340px;
-  width: 100%;
-}
-
-/* ===== Energy Map ===== */
+/* ─── ENERGY 2x2 网格（P1 新增） ─── */
 .energy-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin: 28px 0;
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+  margin: 24px 0;
+}
+.energy-cell {
+  padding: 20px 20px;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  min-height: 120px;
+}
+.energy-cell-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.energy-cell-list {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  line-height: 1.9;
+  color: var(--ink);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.energy-cell-list li { padding: 3px 0; }
+.energy-cell-list li::before {
+  content: '·';
+  color: var(--accent);
+  margin-right: 10px;
+  font-weight: 700;
 }
 
-.energy-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--hairline);
-  border-radius: 3px;
-  padding: 18px 22px;
-  transition: all 0.25s var(--ease);
+/* ─── ODYSSEY ─── */
+.odyssey-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin: 32px 0 0;
 }
-
-.energy-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-
-.energy-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--hairline);
-}
-
-.energy-card:nth-child(1) .energy-label { color: var(--green); }
-.energy-card:nth-child(2) .energy-label { color: var(--accent); }
-.energy-card:nth-child(3) .energy-label { color: var(--blue); }
-.energy-card:nth-child(4) .energy-label { color: var(--warm); }
-
-.energy-item {
-  font-size: 13px;
-  color: var(--ink-60);
-  line-height: 1.75;
-  padding: 4px 0 4px 16px;
-  position: relative;
-}
-
-.energy-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 13px;
-  width: 6px;
-  height: 1.5px;
-  background: var(--ink-20);
-}
-
-/* ===== Odyssey Plans ===== */
-.odyssey-plans {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  margin: 28px 0;
-}
-
 .odyssey-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--hairline);
-  border-radius: 3px;
-  padding: 26px;
-  transition: all 0.25s var(--ease);
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--plan-color, var(--accent));
+  padding: 20px 18px;
   position: relative;
+  transition: all 0.25s ease;
+  cursor: pointer;
 }
-
 .odyssey-card:hover {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-  transform: translateY(-1px);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }
-
-.odyssey-card.plan-a { border-left: 3px solid var(--accent); }
-.odyssey-card.plan-b { border-left: 3px solid var(--green); }
-.odyssey-card.plan-c { border-left: 3px solid var(--blue); }
-
+.odyssey-card.active {
+  border-color: var(--plan-color, var(--accent));
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+.odyssey-card::before {
+  content: attr(data-plan);
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-family: var(--mono);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--plan-color, var(--accent));
+  opacity: 0.1;
+  line-height: 1;
+}
 .odyssey-tag {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  margin-bottom: 8px;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--plan-color, var(--accent));
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 500;
 }
-
-.plan-a .odyssey-tag { color: var(--accent); }
-.plan-b .odyssey-tag { color: var(--green); }
-.plan-c .odyssey-tag { color: var(--blue); }
-
 .odyssey-title {
   font-family: var(--serif);
-  font-size: 20px;
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  line-height: 1.35;
+}
+.odyssey-body {
+  font-size: 0.85rem;
+  color: var(--stone);
+  line-height: 1.7;
+  margin-bottom: 12px;
 }
 
-.odyssey-timeline {
-  font-size: 13.5px;
-  color: var(--ink-60);
-  line-height: 1.9;
-  margin-bottom: 18px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--hairline);
+.odyssey-card-hint {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--mist);
+  text-align: right;
+  margin-top: 10px;
+  letter-spacing: 0.06em;
+  transition: color 0.2s;
 }
+.odyssey-card:hover .odyssey-card-hint { color: var(--plan-color, var(--accent)); }
+.odyssey-card.active .odyssey-card-hint { display: none; }
 
-.odyssey-questions {
-  margin-bottom: 18px;
+/* 全宽详情面板 */
+.odyssey-detail-full {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.35s ease, margin 0.35s ease;
+  opacity: 0;
+  margin-top: 0;
+  border: 1px solid transparent;
+  border-top: 3px solid var(--accent);
+  background: var(--bg);
 }
-
-.q-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink-40);
-  letter-spacing: 0.3px;
-  margin-bottom: 8px;
+.odyssey-detail-full.active {
+  max-height: 1200px;
+  opacity: 1;
+  margin-top: 24px;
+  border-color: var(--rule);
 }
-
-.q-item {
-  font-size: 13px;
-  color: var(--ink-60);
-  line-height: 1.75;
-  padding: 3px 0 3px 16px;
-  position: relative;
+.odyssey-detail-label {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--mist);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
 }
-
-.q-item::before {
-  content: '?';
-  position: absolute;
-  left: 0;
-  color: var(--ink-20);
-  font-weight: 600;
-  font-size: 12px;
-}
-
-/* ===== Eval Bars ===== */
-.eval-grid {
+.odyssey-detail-inner {
+  padding: 28px 32px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px 18px;
+  gap: 32px;
 }
 
-.eval-item {
-  display: flex;
-  align-items: center;
+/* 奥德赛时间线 */
+.odyssey-timeline {
+  padding: 0;
+  background: none;
+  font-size: 0.88rem;
+  line-height: 1.9;
+  color: var(--ink);
+}
+.odyssey-timeline p { margin-bottom: 12px; }
+.odyssey-timeline p:last-child { margin-bottom: 0; }
+.odyssey-timeline .yr {
+  color: var(--plan-color, var(--accent));
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin-right: 8px;
+}
+
+.odyssey-detail-questions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.odyssey-detail-questions li {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--ink);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule-hair);
+  line-height: 1.6;
+}
+.odyssey-detail-questions li:last-child { border-bottom: none; }
+.odyssey-detail-questions li::before {
+  content: '?';
+  color: var(--plan-color, var(--accent));
+  font-weight: 600;
+  margin-right: 10px;
+  font-style: normal;
+}
+
+/* 奥德赛四维评估条 */
+.odyssey-eval {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 64px 1fr 28px;
   gap: 8px;
-}
-
-.eval-name {
-  font-size: 11px;
-  color: var(--ink-40);
-  min-width: 44px;
-}
-
-.eval-bar {
-  flex: 1;
-  height: 4px;
-  background: var(--ink-05);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.eval-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: var(--accent);
-}
-
-.eval-value {
-  font-size: 11px;
-  color: var(--ink-60);
-  font-weight: 500;
-  min-width: 24px;
-  text-align: right;
-}
-
-/* ===== Execution Table ===== */
-.exec-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 24px 0;
-  font-size: 13px;
-}
-
-.exec-table th {
-  background: var(--bg-code);
-  color: var(--ink);
-  font-weight: 600;
-  text-align: left;
-  padding: 11px 16px;
-  border-bottom: 1.5px solid var(--accent-border);
-  font-size: 12px;
-  letter-spacing: 0.3px;
-}
-
-.exec-table td {
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--hairline);
-  color: var(--ink-60);
-  vertical-align: top;
-  line-height: 1.7;
-}
-
-.exec-table td:first-child {
-  font-weight: 500;
-  color: var(--ink-80);
-  white-space: nowrap;
-  width: 120px;
-}
-
-.exec-table tbody tr:hover { background: var(--bg-hover); }
-.exec-table tbody tr:hover td { color: var(--ink); }
-
-/* ===== Action List ===== */
-.action-list { margin: 24px 0; }
-
-.action-item {
-  display: flex;
-  gap: 14px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--hairline);
-  align-items: flex-start;
-}
-
-.action-item:last-child { border-bottom: none; }
-
-.action-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  flex-shrink: 0;
-  margin-top: 2px;
+  padding: 5px 0;
+  font-family: var(--mono);
+  font-size: 0.6rem;
 }
-
-.action-icon.talk { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-border); }
-.action-icon.try { background: var(--green-soft); color: var(--green); border: 1px solid var(--green-border); }
-.action-icon.step { background: var(--blue-soft); color: var(--blue); border: 1px solid var(--blue-border); }
-.action-icon.habit { background: var(--warm-soft); color: var(--warm); border: 1px solid var(--warm-border); }
-
-.action-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 4px;
+.odyssey-eval-label {
+  color: var(--mist);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
-
-.action-desc {
-  font-size: 12.5px;
-  color: var(--ink-40);
-  line-height: 1.75;
-}
-
-/* ===== Future Letter（给6个月后自己的一封信） ===== */
-.future-letter {
-  background: linear-gradient(180deg, #FAF8F5 0%, #F5F0EB 100%);
-  border: 1px solid var(--hairline);
-  border-radius: 6px;
-  padding: 36px 40px;
-  margin: 36px 0;
+.odyssey-eval-bar {
+  height: 2px;
+  background: var(--rule-hair);
   position: relative;
 }
-
-.future-letter::before {
+.odyssey-eval-bar::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent) 0%, var(--green) 50%, var(--blue) 100%);
-  border-radius: 6px 6px 0 0;
+  left: 0; top: 0; bottom: 0;
+  background: var(--plan-color, var(--accent));
+  width: var(--val, 50%);
 }
-
-.future-letter .letter-date {
-  font-size: 11px;
-  color: var(--ink-40);
-  letter-spacing: 0.5px;
-  margin-bottom: 20px;
-}
-
-.future-letter .letter-body {
-  font-family: var(--serif);
-  font-size: 15px;
-  line-height: 2;
-  color: var(--ink-60);
-}
-
-.future-letter .letter-body p {
-  margin-bottom: 16px;
-  font-size: 15px;
-  line-height: 2;
-  color: var(--ink-60);
-}
-
-.future-letter .letter-sig {
-  margin-top: 24px;
-  font-size: 13px;
-  color: var(--ink-40);
-  font-style: italic;
+.odyssey-eval-val {
   text-align: right;
+  color: var(--stone);
 }
 
-/* ===== Closing ===== */
-.closing {
-  background: var(--bg-alt);
-  border-radius: 3px;
-  padding: 32px 36px;
-  margin: 36px 0;
-  border: 1px solid var(--hairline);
-}
-
-.closing p {
-  font-size: 14.5px;
-  line-height: 2;
-  color: var(--ink-60);
-  margin-bottom: 12px;
-}
-
-.closing p:last-child { margin-bottom: 0; }
-
-.closing .closing-sig {
-  margin-top: 24px;
-  font-size: 12px;
-  color: var(--ink-40);
+/* 奥德赛想问自己的问题 */
+.odyssey-questions {
+  margin: 0;
+  font-family: var(--serif);
   font-style: italic;
+  font-size: 0.78rem;
+  color: var(--stone);
+  line-height: 1.7;
+  padding-left: 0;
+  list-style: none;
+}
+.odyssey-questions li {
+  padding: 3px 0;
+}
+.odyssey-questions li::before {
+  content: '— ';
+  color: var(--plan-color, var(--accent));
+  font-style: normal;
 }
 
-/* ===== Philosophy Quote ===== */
-.philosophy-quote {
+/* ─── ACTIONS 四组 timeline（P1 增强） ─── */
+.actions-group {
+  margin: 20px 0;
+}
+.actions-group-title {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule-hair);
+}
+.timeline {
+  margin: 12px 0 0;
+  position: relative;
+  padding-left: 32px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--rule);
+}
+.timeline-item {
+  position: relative;
+  padding-bottom: 22px;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -29px;
+  top: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.timeline-check {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--mist);
+  margin-top: 5px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 12px;
   text-align: center;
+  color: transparent;
+  transition: all 0.2s;
+  user-select: none;
+}
+.timeline-check.checked {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.timeline-text {
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+/* ─── FUTURE LETTER ─── */
+.letter-wrap {
+  background: var(--paper);
   padding: 40px 32px;
-  margin: 40px 0;
+  margin: 32px 0;
   position: relative;
 }
-
-.philosophy-quote .pq-text {
+.letter-wrap::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  border: 1px solid var(--rule);
+  pointer-events: none;
+}
+.letter-date {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--mist);
+  letter-spacing: 0.1em;
+  margin-bottom: 24px;
+}
+.letter-greeting {
   font-family: var(--serif);
-  font-size: 16px;
-  color: var(--ink-60);
+  font-size: 1.1rem;
+  margin-bottom: 24px;
+}
+.letter-body {
+  font-size: 1rem;
   line-height: 1.8;
+  color: var(--ink);
+}
+.letter-body p { margin-bottom: 1em; }
+.letter-sign {
+  margin-top: 32px;
+  font-family: var(--serif);
   font-style: italic;
-  margin-bottom: 12px;
+  color: var(--stone);
 }
 
-.philosophy-quote .pq-author {
-  font-size: 12px;
-  color: var(--ink-40);
-  letter-spacing: 0.5px;
-}
-
-.philosophy-quote .pq-line {
-  width: 40px;
-  height: 1px;
-  background: var(--accent);
-  margin: 16px auto 0;
-  opacity: 0.5;
-}
-
-/* ===== Footer ===== */
-.report-footer {
-  margin-top: 56px;
-  padding-top: 24px;
-  border-top: 1px solid var(--hairline);
-  font-size: 11px;
-  color: var(--ink-20);
+/* ─── GOLDEN QUOTE (简约内联) ─── */
+.golden-quote {
+  padding: 40px 20px;
+  margin: 24px 0;
   text-align: center;
-  letter-spacing: 0.5px;
+}
+.golden-quote-text {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 400;
+  line-height: 1.9;
+  color: var(--ink);
+  margin: 0 0 14px;
+  font-style: italic;
+}
+.golden-quote-author {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--mist);
+  letter-spacing: 0.1em;
 }
 
-/* ===== Responsive ===== */
+/* ─── CLOSING QUOTE (简约内联) ─── */
+.closing-quote {
+  padding: 28px 0;
+  text-align: center;
+  margin-top: 20px;
+}
+.closing-quote-line {
+  width: 20px;
+  height: 1px;
+  background: var(--mist);
+  margin: 0 auto 20px;
+}
+.closing-quote-text {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.85;
+  max-width: 480px;
+  margin: 0 auto 14px;
+  color: var(--ink);
+}
+.closing-quote-author {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--mist);
+  letter-spacing: 0.12em;
+}
+
+/* ─── APPOINTMENT：时间胶囊封存说明 ─── */
+.appointment {
+  padding: 40px 0 48px;
+  text-align: center;
+}
+.appointment-desc {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: var(--ink);
+  line-height: 1.9;
+  max-width: 440px;
+  margin: 0 auto 20px;
+}
+.appointment-date {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--stone);
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+.appointment-hint {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--mist);
+  line-height: 1.8;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* ─── MD 双载体：复制/下载按钮（P3） ─── */
+.md-actions {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 40px 0 20px;
+}
+.md-btn {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--stone);
+  background: transparent;
+  border: 1px solid var(--rule);
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.md-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--bg);
+}
+.md-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+/* ─── FOOTER ─── */
+.footer {
+  padding: 40px 0;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+.footer-text {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  line-height: 2.4;
+}
+.footer-capsule {
+  margin-top: 12px;
+  font-size: 0.6rem;
+  color: var(--mist);
+  letter-spacing: 0.1em;
+  text-transform: none;
+}
+
+/* responsive */
 @media (max-width: 640px) {
-  .container { padding: 32px 20px 60px; }
-  .report-header h1 { font-size: 26px; }
-  .dashboard { grid-template-columns: 1fr; }
-  .compass { grid-template-columns: 1fr; }
+  .page { padding: 0 24px; }
+  .hero-title { font-size: 2rem; }
+  .kpi-strip, .kpi-notes { grid-template-columns: repeat(2, 1fr); }
+  .kpi:nth-child(2), .kpi-note:nth-child(2) { border-right: none; }
+  .kpi:nth-child(1), .kpi:nth-child(2),
+  .kpi-note:nth-child(1), .kpi-note:nth-child(2) { border-bottom: 1px solid var(--rule-hair); }
+  .letter-wrap { padding: 40px 24px; }
+  .reframe-grid { padding: 24px 20px; }
+  .reframe-row { grid-template-columns: 100px 18px 1fr; }
+  .compass-pair { grid-template-columns: 1fr; }
+  .compass-connector { display: none; }
   .energy-grid { grid-template-columns: 1fr; }
-  .eval-grid { grid-template-columns: 1fr; }
-  .future-letter { padding: 28px 24px; }
-  .quote-card { padding: 24px 20px; }
+  .odyssey-grid { grid-template-columns: 1fr; }
+  .odyssey-card::before { font-size: 2rem; }
+  .odyssey-eval { grid-template-columns: 80px 1fr 40px; }
+  .odyssey-detail-inner { grid-template-columns: 1fr; padding: 20px 18px; }
 }
 
-/* ===== Print ===== */
 @media print {
-  body { background: #fff; }
-  .container { max-width: none; padding: 20px; }
-  .odyssey-card:hover, .dashboard-item:hover, .energy-card:hover {
-    transform: none;
-    box-shadow: none;
-  }
-  .section { page-break-inside: avoid; }
+  body::before { display: none; }
+  .md-actions { display: none; }
 }
 '''
 
 
-def build_radar_svg(scores):
-    """
-    构建 SVG 雷达图。
+def build_score_bars(scores):
+    """四段水平进度条替代雷达图（Mixing Board 风格）。
     scores: dict like {"health": 7, "work": 5, "play": 3, "love": 8}
     """
     dims = ['health', 'work', 'play', 'love']
-    labels = ['健康', '工作', '娱乐', '爱']
-    colors = [COLORS['green'], COLORS['accent'], COLORS['blue'], COLORS['warm']]
-
-    cx, cy, r = 170, 160, 110
-    import math
-
-    def point_at(angle_deg, radius):
-        rad = math.radians(angle_deg - 90)
-        return (cx + radius * math.cos(rad), cy + radius * math.sin(rad))
-
-    # Grid circles
-    grid_lines = ''
-    for pct in [0.25, 0.5, 0.75, 1.0]:
-        gr = r * pct
-        grid_lines += f'<circle cx="{cx}" cy="{cy}" r="{gr}" fill="none" stroke="#E0DCD6" stroke-width="0.5" />\n'
-
-    # Axis lines
-    axis_lines = ''
-    for i in range(4):
-        angle = i * 90
-        px, py = point_at(angle, r)
-        axis_lines += f'<line x1="{cx}" y1="{cy}" x2="{px:.1f}" y2="{py:.1f}" stroke="#E0DCD6" stroke-width="0.5" />\n'
-
-    # Data polygon
-    data_points = []
-    for i, dim in enumerate(dims):
+    html = '<div class="score-bars">\n'
+    for dim in dims:
         score = min(max(scores.get(dim, 0), 0), 10)
-        angle = i * 90
-        pr = r * (score / 10)
-        px, py = point_at(angle, pr)
-        data_points.append(f'{px:.1f},{py:.1f}')
-
-    data_polygon = ' '.join(data_points)
-
-    # Data dots and labels
-    dots = ''
-    label_els = ''
-    for i, dim in enumerate(dims):
-        score = min(max(scores.get(dim, 0), 0), 10)
-        angle = i * 90
-        pr = r * (score / 10)
-        px, py = point_at(angle, pr)
-        dots += f'<circle cx="{px:.1f}" cy="{py:.1f}" r="4" fill="{colors[i]}" stroke="white" stroke-width="1.5" />\n'
-
-        # Label (outside the circle)
-        lx, ly = point_at(angle, r + 24)
-        score_text = f'{score}/10'
-        label_els += f'<text x="{lx:.1f}" y="{ly - 6:.1f}" text-anchor="middle" font-family="Noto Serif SC, serif" font-size="13" font-weight="600" fill="{colors[i]}">{labels[i]}</text>\n'
-        label_els += f'<text x="{lx:.1f}" y="{ly + 10:.1f}" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#8B867E">{score_text}</text>\n'
-
-    svg = f'''<svg viewBox="0 0 340 320" xmlns="http://www.w3.org/2000/svg">
-  {grid_lines}
-  {axis_lines}
-  <polygon points="{data_polygon}" fill="rgba(200,106,74,0.08)" stroke="{COLORS['accent']}" stroke-width="1.5" stroke-linejoin="round" />
-  {dots}
-  {label_els}
-</svg>'''
-    return svg
+        meta = DIM_META.get(dim, {})
+        label = meta.get('label', dim)
+        color = meta.get('color', 'var(--accent)')
+        pct = score * 10
+        html += (
+            f'  <div class="score-bar">'
+            f'<span class="score-bar-label">{label}</span>'
+            f'<span class="score-bar-track">'
+            f'<span class="score-bar-fill" style="width:{pct}%;background:{color}"></span>'
+            f'</span>'
+            f'<span class="score-bar-val">{score}/10</span>'
+            f'</div>\n'
+        )
+    html += '</div>\n'
+    return html
 
 
-def build_section(num, title, content_html):
-    """构建一个章节"""
+def build_section(num, title, content_html, epigraph=None):
+    """style-c 基调的章节容器；epigraph 是可选的用户原话章节题记 dict {"text":..., "phase":...}"""
+    epi = ""
+    if epigraph and epigraph.get("text"):
+        phase = epigraph.get("phase") or "对话中"
+        epi = (
+            f'    <div class="section-epigraph">'
+            f'"{epigraph["text"]}"'
+            f'<span class="attr">— 你 · {phase}</span>'
+            f'</div>\n'
+        )
     return f'''
   <section class="section">
     <div class="section-number">{num:02d}</div>
-    <h2>{title}</h2>
-    {content_html}
+    <h2 class="section-title">{title}</h2>
+{epi}    <div class="section-body">
+{content_html}
+    </div>
   </section>
 '''
 
 
+
+
+
 def build_dashboard_html(dashboard):
-    """构建仪表盘 HTML"""
+    """01 你在这里：narrative + KPI + KPI 注解 + insight + radar"""
     html = ''
+    if dashboard.get('narrative'):
+        html += f"{dashboard['narrative']}\n"
 
-    if 'narrative' in dashboard:
-        html += f'<div class="narrative">{dashboard["narrative"]}</div>\n'
+    scores = dashboard.get('scores') or {}
+    if scores:
+        # KPI 分数条
+        html += '</div>\n'  # 关闭 section-body，让 KPI 横铺
+        html += '    <div class="kpi-strip">\n'
+        for k in ['health', 'work', 'play', 'love']:
+            item = scores.get(k) or {}
+            val = item.get('score', '—') if isinstance(item, dict) else item
+            label = DIM_META.get(k, {}).get('label', k)
+            color = DIM_META.get(k, {}).get('color', 'var(--accent)')
+            html += f'      <div class="kpi" style="--kpi-color: {color}"><div class="kpi-value" style="color: {color}">{val}</div><div class="kpi-label">{label}</div></div>\n'
+        html += '    </div>\n'
 
-    scores = dashboard.get('scores', {})
-    html += '<div class="dashboard">\n'
-    for dim in ['health', 'work', 'play', 'love']:
-        meta = DIM_META[dim]
-        s = scores.get(dim, {})
-        score = s.get('score', '—')
-        note = s.get('note', '')
-        try:
-            pct = int(float(score) * 10)
-        except (ValueError, TypeError):
-            pct = 0
+        # KPI 注解（P1 新增）
+        has_notes = any(isinstance(scores.get(k), dict) and scores.get(k, {}).get('note') for k in ['health','work','play','love'])
+        if has_notes:
+            html += '    <div class="kpi-notes">\n'
+            for k in ['health', 'work', 'play', 'love']:
+                item = scores.get(k) or {}
+                note = item.get('note', '') if isinstance(item, dict) else ''
+                html += f'      <div class="kpi-note">{note}</div>\n'
+            html += '    </div>\n'
+        html += '    <div class="section-body">\n'  # 重开 section-body
 
-        html += f'''    <div class="dashboard-item">
-      <div class="dim-label">{meta['label']}</div>
-      <div class="dim-hint">{meta['hint']}</div>
-      <div class="dim-score">{score} <span>/ 10</span></div>
-      <div class="dim-bar"><div class="dim-bar-fill" style="width: {pct}%; background: {meta['color']}"></div></div>
-      <div class="dim-note">{note}</div>
-    </div>
-'''
-    html += '  </div>\n'
+    if dashboard.get('analysis'):
+        html += f"{dashboard['analysis']}\n"
 
-    # Radar chart
-    score_vals = {}
-    for dim in ['health', 'work', 'play', 'love']:
-        s = scores.get(dim, {})
-        try:
-            score_vals[dim] = float(s.get('score', 0))
-        except (ValueError, TypeError):
-            score_vals[dim] = 0
-
-    html += f'  <div class="radar-container">\n    {build_radar_svg(score_vals)}\n  </div>\n'
-
-    if 'analysis' in dashboard:
-        html += f'<div class="narrative">{dashboard["analysis"]}</div>\n'
+    # 四段水平进度条（替代雷达图）
+    if scores:
+        bar_scores = {k: (v.get('score', 0) if isinstance(v, dict) else v) for k, v in scores.items()}
+        html += build_score_bars(bar_scores)
 
     return html
 
 
 def build_reframe_html(reframe):
-    """构建真问题 HTML"""
+    """02 真问题：narrative + 四步对照 + conclusion"""
     html = ''
-    if 'narrative' in reframe:
-        html += f'<div class="narrative">{reframe["narrative"]}</div>\n'
+    if reframe.get('narrative'):
+        html += f"{reframe['narrative']}\n"
 
-    html += '  <div class="reframe-card">\n'
-    rows = [
-        ('你以为的', reframe.get('perceived', ''), False),
-        ('重力问题', reframe.get('gravity', ''), False),
-        ('真问题', reframe.get('real', ''), True),
-        ('错误前提', reframe.get('wrong_premise', ''), False),
+    # 四步对照（P1 核心）
+    keys = [
+        ('perceived',    '你以为的'),
+        ('gravity',      '重力问题'),
+        ('real',         '真   问题'),
+        ('wrong_premise','错误前提'),
     ]
-    for label, value, highlight in rows:
-        cls = ' highlight' if highlight else ''
-        html += f'    <div class="reframe-row">\n'
-        html += f'      <div class="reframe-label">{label}</div>\n'
-        html += f'      <div class="reframe-value{cls}">{value}</div>\n'
-        html += f'    </div>\n'
-    html += '  </div>\n'
+    rows = [(k, label) for k, label in keys if reframe.get(k)]
+    if rows:
+        html += '</div>\n    <div class="reframe-grid">\n'
+        for k, label in rows:
+            val = reframe.get(k, '')
+            cls = 'reframe-val real' if k == 'real' else 'reframe-val'
+            html += (
+                f'      <div class="reframe-row">'
+                f'<span class="reframe-key">{label}</span>'
+                f'<span class="reframe-arrow">→</span>'
+                f'<span class="{cls}">{val}</span>'
+                f'</div>\n'
+            )
+        html += '    </div>\n    <div class="section-body">\n'
 
-    if 'conclusion' in reframe:
-        html += f'<div class="narrative">{reframe["conclusion"]}</div>\n'
-
+    if reframe.get('conclusion'):
+        html += f"{reframe['conclusion']}\n"
     return html
 
 
 def build_compass_html(compass):
-    """构建指南针 HTML"""
+    """03 指南针：工作观 vs 人生观 对齐图"""
     html = ''
-    if 'narrative' in compass:
-        html += f'<div class="narrative">{compass["narrative"]}</div>\n'
+    if compass.get('narrative'):
+        html += f"{compass['narrative']}\n"
 
-    html += '  <div class="compass">\n'
-    html += f'    <div class="compass-item">\n'
-    html += f'      <div class="compass-title">工作观</div>\n'
-    html += f'      <div class="compass-text">{compass.get("work_view", "")}</div>\n'
-    html += f'    </div>\n'
-    html += f'    <div class="compass-item">\n'
-    html += f'      <div class="compass-title">人生观</div>\n'
-    html += f'      <div class="compass-text">{compass.get("life_view", "")}</div>\n'
-    html += f'    </div>\n'
-    html += '  </div>\n'
+    work_view = compass.get('work_view', '')
+    life_view = compass.get('life_view', '')
+    alignment = compass.get('alignment', '')
 
-    if 'diagnosis' in compass:
-        html += f'<div class="narrative">{compass["diagnosis"]}</div>\n'
+    if work_view or life_view:
+        connector = '↔' if alignment and '错位' not in alignment else '=='
+        html += '</div>\n    <div class="compass-pair">\n'
+        html += f'      <div class="compass-cell"><div class="compass-cell-label">工作观</div><div class="compass-cell-text">{work_view}</div></div>\n'
+        html += f'      <div class="compass-connector">{connector}</div>\n'
+        html += f'      <div class="compass-cell"><div class="compass-cell-label">人生观</div><div class="compass-cell-text">{life_view}</div></div>\n'
+        html += '    </div>\n'
+        if alignment:
+            html += f'    <div class="compass-verdict">{alignment}</div>\n'
+        html += '    <div class="section-body">\n'
 
+    if compass.get('conclusion') or compass.get('diagnosis'):
+        html += f"{compass.get('conclusion') or compass.get('diagnosis')}\n"
     return html
 
 
 def build_energy_html(energy):
-    """构建能量地图 HTML"""
+    """04 能量地图：2x2 四象限（P1 核心）"""
     html = ''
-    if 'narrative' in energy:
-        html += f'<div class="narrative">{energy["narrative"]}</div>\n'
+    if energy.get('narrative'):
+        html += f"{energy['narrative']}\n"
 
-    cards = [
-        ('心流时刻', energy.get('flow', [])),
-        ('回血活动', energy.get('recharge', [])),
-        ('擅长但耗能', energy.get('drain', [])),
-        ('设计偏向', energy.get('direction', [])),
+    cells = [
+        ('flow',            '心流时刻',    None),
+        ('recharge',        '回血活动',    None),
+        ('drain_but_good',  '擅长但耗能',  'drain'),
+        ('lean_toward',     '偏  向',      'direction'),
     ]
+    def _get_energy(key, fallback_key):
+        val = energy.get(key)
+        if not val and fallback_key:
+            val = energy.get(fallback_key)
+        return val
 
-    html += '  <div class="energy-grid">\n'
-    for label, items in cards:
-        html += f'    <div class="energy-card">\n'
-        html += f'      <div class="energy-label">{label}</div>\n'
-        for item in items:
-            html += f'      <div class="energy-item">{item}</div>\n'
-        html += f'    </div>\n'
-    html += '  </div>\n'
+    has_any = any(_get_energy(k, fk) for k, _, fk in cells)
+    if has_any:
+        html += '</div>\n    <div class="energy-grid">\n'
+        for key, label, fallback_key in cells:
+            val = _get_energy(key, fallback_key)
+            items = []
+            if isinstance(val, list):
+                items = val
+            elif isinstance(val, str) and val:
+                items = [val]
+            html += '      <div class="energy-cell">\n'
+            html += f'        <div class="energy-cell-label">{label}</div>\n'
+            if items:
+                html += '        <ul class="energy-cell-list">\n'
+                for it in items:
+                    html += f'          <li>{it}</li>\n'
+                html += '        </ul>\n'
+            html += '      </div>\n'
+        html += '    </div>\n    <div class="section-body">\n'
 
-    if 'formula' in energy:
-        html += f'  <blockquote><p>{energy["formula"]}</p></blockquote>\n'
-
-    if 'conclusion' in energy:
-        html += f'<div class="narrative">{energy["conclusion"]}</div>\n'
+    if energy.get('formula'):
+        html += f'<div class="insight-card"><div class="insight-label">能量公式</div><div class="insight-text">{energy["formula"]}</div></div>\n'
+    if energy.get('conclusion'):
+        html += f"{energy['conclusion']}\n"
 
     return html
 
 
 def build_odyssey_html(odyssey):
-    """构建奥德赛计划 HTML"""
+    """05 奥德赛三条路：三列卡片 + 点击展开全宽详情面板 + 四维评估条"""
+    import json as _json
     html = ''
-    if 'narrative' in odyssey:
-        html += f'<div class="narrative">{odyssey["narrative"]}</div>\n'
+    if odyssey.get('narrative'):
+        html += f"{odyssey['narrative']}\n"
 
-    plans = odyssey.get('plans', [])
+    plans = odyssey.get('plans') or []
     if plans:
-        html += '  <div class="odyssey-plans">\n'
+        html += '</div>\n    <div class="odyssey-grid">\n'
+        tags = ['Plan A · 延续当下', 'Plan B · 另一条路', 'Plan C · 无限可能']
+        colors = ['#C86A4A', '#5A8A62', '#4A7A9C']
+        letters = ['A', 'B', 'C']
+        plan_data = {}
         for i, plan in enumerate(plans):
-            key = ['a', 'b', 'c'][i] if i < 3 else 'a'
-            html += f'    <div class="odyssey-card plan-{key}">\n'
-            html += f'      <div class="odyssey-tag">{PLAN_LABELS.get(key.upper(), "")}</div>\n'
-            html += f'      <div class="odyssey-title">{plan.get("title", "")}</div>\n'
-            html += f'      <div class="odyssey-timeline">{plan.get("timeline", "")}</div>\n'
+            if not isinstance(plan, dict):
+                continue
+            tag = tags[i] if i < len(tags) else f'Plan · {i+1}'
+            color = colors[i] if i < len(colors) else '#C86A4A'
+            letter = letters[i] if i < len(letters) else 'X'
+            title = plan.get('title', '')
+            timeline = plan.get('timeline') or plan.get('summary') or ''
+            body = plan.get('body') or ''
+            questions = plan.get('questions') or []
+            ev = plan.get('eval') or {}
 
-            questions = plan.get('questions', [])
-            if questions:
-                html += '      <div class="odyssey-questions">\n'
-                html += '        <div class="q-label">值得测试的问题</div>\n'
-                for q in questions:
-                    html += f'        <div class="q-item">{q}</div>\n'
-                html += '      </div>\n'
+            # 存储详情数据给 JS
+            plan_data[letter] = {
+                'tag': tag, 'title': title, 'color': color,
+                'timeline': timeline, 'body': body, 'questions': questions
+            }
 
-            eval_data = plan.get('eval', {})
-            if eval_data:
-                html += '      <div class="eval-grid">\n'
-                eval_items = [
-                    ('物力', 'resources'),
-                    ('喜欢', 'like'),
-                    ('自信', 'confidence'),
-                    ('一致性', 'alignment'),
-                ]
-                color = PLAN_COLORS.get(key.upper(), COLORS['accent'])
-                for label, field in eval_items:
-                    val = eval_data.get(field, 0)
+            html += f'      <div class="odyssey-card" data-plan="{letter}" style="--plan-color: {color}" onclick="toggleOdyssey(this)">\n'
+            html += f'        <div class="odyssey-tag">{tag}</div>\n'
+            html += f'        <h3 class="odyssey-title">{title}</h3>\n'
+
+            # 四维评估条（始终可见）
+            if ev:
+                for key, label in [('resources','资源'), ('like','喜欢'), ('confidence','信心'), ('alignment','对齐')]:
+                    v = ev.get(key, 0)
                     try:
-                        pct = int(float(val))
-                    except (ValueError, TypeError):
-                        pct = 0
-                    val_label = eval_data.get(f'{field}_label', f'{pct}%')
-                    html += f'        <div class="eval-item">\n'
-                    html += f'          <span class="eval-name">{label}</span>\n'
-                    html += f'          <div class="eval-bar"><div class="eval-bar-fill" style="width: {pct}%; background: {color}"></div></div>\n'
-                    html += f'          <span class="eval-value">{val_label}</span>\n'
-                    html += f'        </div>\n'
-                html += '      </div>\n'
+                        v = max(0, min(100, int(v)))
+                    except Exception:
+                        v = 0
+                    html += (
+                        f'        <div class="odyssey-eval">'
+                        f'<span class="odyssey-eval-label">{label}</span>'
+                        f'<span class="odyssey-eval-bar" style="--val: {v}%;"></span>'
+                        f'<span class="odyssey-eval-val">{v}</span>'
+                        f'</div>\n'
+                    )
 
-            html += '    </div>\n'
-        html += '  </div>\n'
+            html += f'        <div class="odyssey-card-hint">点击展开 ↓</div>\n'
+            html += '      </div>\n'
+        html += '    </div>\n'
 
-    # Execution structure
-    exec_data = odyssey.get('execution')
-    if exec_data:
-        html += '  <h3>可执行结构（你选择先试的那条路）</h3>\n'
-        html += '  <table class="exec-table">\n    <tbody>\n'
-        exec_rows = [
-            ('反愿景', 'anti_vision'),
-            ('愿景', 'vision'),
-            ('本季度核心问题', 'quarter_q'),
-            ('一个月原型', 'month_proto'),
-            ('每日微行动', 'daily'),
-            ('底线', 'bottom_line'),
-        ]
-        for label, field in exec_rows:
-            val = exec_data.get(field, '')
-            if val:
-                html += f'      <tr><td>{label}</td><td>{val}</td></tr>\n'
-        html += '    </tbody>\n  </table>\n'
+        # 全宽详情面板（一个 div，内容由 JS 填充）
+        html += '    <div class="odyssey-detail-full" id="odyssey-panel">\n'
+        html += '      <div class="odyssey-detail-inner" id="odyssey-panel-inner">\n'
+        html += '      </div>\n'
+        html += '    </div>\n'
 
-    if 'conclusion' in odyssey:
-        html += f'<div class="narrative">{odyssey["conclusion"]}</div>\n'
+        # 把 plan 数据嵌入 JS
+        html += f'    <script>var __odysseyPlans = {_json.dumps(plan_data, ensure_ascii=False)};</script>\n'
+        html += '    <div class="section-body">\n'
+
+    # 执行路径（execution）
+    ex = odyssey.get('execution') or {}
+    if ex:
+        html += '<div class="insight-card"><div class="insight-label">执行路径</div>\n'
+        if ex.get('anti_vision'):
+            html += f'<p style="margin-bottom:8px;"><strong style="color:var(--accent);">反愿景：</strong>{ex["anti_vision"]}</p>\n'
+        if ex.get('vision'):
+            html += f'<p style="margin-bottom:8px;"><strong style="color:#5A8A62;">愿  景：</strong>{ex["vision"]}</p>\n'
+        if ex.get('quarter_q'):
+            html += f'<p style="margin-bottom:8px;"><strong>本季度核心问题：</strong>{ex["quarter_q"]}</p>\n'
+        if ex.get('month_proto'):
+            html += f'<p style="margin-bottom:8px;"><strong>本月原型：</strong>{ex["month_proto"]}</p>\n'
+        if ex.get('daily'):
+            html += f'<p style="margin-bottom:8px;"><strong>每日习惯：</strong>{ex["daily"]}</p>\n'
+        if ex.get('bottom_line'):
+            html += f'<p><strong>底线规则：</strong>{ex["bottom_line"]}</p>\n'
+        html += '</div>\n'
+
+    if odyssey.get('conclusion'):
+        html += f"{odyssey['conclusion']}\n"
 
     return html
 
 
+ACTION_GROUPS = [
+    ('talk', '谈  ·  TALK'),
+    ('try',  '试  ·  TRY'),
+    ('step', '走  ·  GO'),
+    ('habit','醒  ·  WAKE'),
+]
+
 def build_actions_html(actions):
-    """构建行动清单 HTML"""
+    """06 原型行动清单：分四组 timeline + 可勾选（P1 核心）"""
     html = ''
-    if 'narrative' in actions:
-        html += f'<div class="narrative">{actions["narrative"]}</div>\n'
+    if actions.get('narrative'):
+        html += f"{actions['narrative']}\n"
 
-    action_types = [
-        ('talk', '谈', '原型对话'),
-        ('try', '试', '原型体验'),
-        ('step', '走', '本周第一步'),
-        ('habit', '醒', '随身练习'),
-    ]
+    html += '</div>\n'
+    for key, title in ACTION_GROUPS:
+        items = actions.get(key)
+        if not items:
+            continue
+        if isinstance(items, str):
+            items = [items]
 
-    html += '  <div class="action-list">\n'
-    for i, (icon_cls, icon_text, title) in enumerate(action_types):
-        key = ['talk', 'try', 'step', 'habit'][i]
-        desc = actions.get(key, '')
-        if desc:
-            html += f'    <div class="action-item">\n'
-            html += f'      <div class="action-icon {icon_cls}">{icon_text}</div>\n'
-            html += f'      <div class="action-content">\n'
-            html += f'        <div class="action-title">{title}</div>\n'
-            html += f'        <div class="action-desc">{desc}</div>\n'
-            html += f'      </div>\n'
-            html += f'    </div>\n'
-    html += '  </div>\n'
-
+        html += '    <div class="actions-group">\n'
+        html += f'      <div class="actions-group-title">{title}</div>\n'
+        html += '      <div class="timeline">\n'
+        for i, item in enumerate(items):
+            text = item if isinstance(item, str) else item.get('what', '')
+            html += (
+                f'        <div class="timeline-item">'
+                f'<span class="timeline-check" data-idx="{key}-{i}">✓</span>'
+                f'<div class="timeline-text">{text}</div>'
+                f'</div>\n'
+            )
+        html += '      </div>\n'
+        html += '    </div>\n'
+    html += '    <div class="section-body">\n'
     return html
 
 
 def build_quote_card_html(quote):
-    """构建对话金句卡"""
-    html = '  <div class="quote-card">\n'
-    html += '    <div class="quote-label">你在对话中说的一句话</div>\n'
-    html += f'    <div class="quote-text">{quote.get("text", "")}</div>\n'
-    if quote.get('context'):
-        html += f'    <div class="quote-context">{quote["context"]}</div>\n'
-    html += '  </div>\n'
-    return html
+    """金句卡：横线 + 大字 + author"""
+    text = quote.get('text', '') if isinstance(quote, dict) else str(quote)
+    context = quote.get('context', '') if isinstance(quote, dict) else ''
+    author_line = f'— 你 · {context}' if context else '— 你说过的话'
+    return f'''
+  <div class="golden-quote">
+    <p class="golden-quote-text">"{text}"</p>
+    <div class="golden-quote-author">{author_line}</div>
+  </div>
+'''
 
 
 def build_future_letter_html(letter):
-    """构建给未来的信"""
-    future_date = letter.get('date', '')
+    """给未来的信"""
+    if not isinstance(letter, dict):
+        return ''
+    date = letter.get('date', '')
+    greeting = letter.get('greeting', '亲爱的未来的你：')
     body = letter.get('body', '')
-    html = '  <div class="future-letter">\n'
-    html += f'    <div class="letter-date">写给 {future_date} 的你</div>\n'
-    html += f'    <div class="letter-body">{body}</div>\n'
-    html += '    <div class="letter-sig">— 此刻的你</div>\n'
-    html += '  </div>\n'
-    return html
+    sign = letter.get('sign', '—— 那个下午的你')
+    return f'''
+  <div class="letter-wrap">
+    <div class="letter-date">{date}</div>
+    <div class="letter-greeting">{greeting}</div>
+    <div class="letter-body">{body}</div>
+    <div class="letter-sign">{sign}</div>
+  </div>
+'''
 
 
 def build_closing_html(closing):
-    """构建失败免疫 HTML"""
+    """07 失败免疫"""
     html = ''
-    if 'narrative' in closing:
-        html += f'  <div class="closing">\n'
-        html += f'    {closing["narrative"]}\n'
-        html += '    <div class="closing-sig">— 你的人生设计师</div>\n'
-        html += '  </div>\n'
-
-    quote = closing.get('philosophy_quote')
+    if closing.get('narrative'):
+        html += f"{closing['narrative']}\n"
+    quote = closing.get('quote') or closing.get('philosophy_quote')
     if quote:
-        html += '  <div class="philosophy-quote">\n'
-        html += f'    <div class="pq-text">{quote.get("text", "")}</div>\n'
-        html += f'    <div class="pq-author">{quote.get("author", "")}</div>\n'
-        html += '    <div class="pq-line"></div>\n'
-        html += '  </div>\n'
-
+        text = quote.get('text', '') if isinstance(quote, dict) else str(quote)
+        author = quote.get('author', '') if isinstance(quote, dict) else ''
+        author_line = f'—— {author}' if author else '—— 无限游戏 · Simon Sinek'
+        html += (
+            '</div>\n    <div class="closing-quote">\n'
+            '      <div class="closing-quote-line"></div>\n'
+            f'      <p class="closing-quote-text">{text}</p>\n'
+            f'      <div class="closing-quote-author">{author_line}</div>\n'
+            '    </div>\n    <div class="section-body">\n'
+        )
     return html
 
 
-def generate_report(data):
-    """
-    从富文本 JSON 生成完整 HTML 报告。
+def _pick_epigraph_for(section_key, data):
+    """从 data['epigraphs'] 或用户原话池里挑一句作为章节题记"""
+    epis = (data.get('epigraphs') or {})
+    e = epis.get(section_key)
+    if isinstance(e, dict) and e.get('text'):
+        return e
+    if isinstance(e, str) and e.strip():
+        return {"text": e.strip(), "phase": section_key.upper()}
+    return None
 
-    JSON 结构使用内容区块（narrative），不再是原子占位符。
-    AI 自由写作的叙事文本会被包裹在精美的样式中。
+
+def _build_masthead(data, capsule_hint=None):
+    """MASTHEAD：编号 + 日期"""
+    date = data.get('date') or datetime.now().strftime('%Y.%m')
+    short_date = date
+    try:
+        d = datetime.strptime(data.get('date', ''), '%Y年%m月%d日')
+        short_date = d.strftime('%Y.%m')
+    except Exception:
+        try:
+            d = datetime.strptime(data.get('date', ''), '%Y-%m-%d')
+            short_date = d.strftime('%Y.%m')
+        except Exception:
+            pass
+    volume = data.get('volume') or 'Nº 001'
+    return f'''
+  <header class="masthead">
+    <div class="masthead-left">人生设计蓝图<br>Life Design Blueprint</div>
+    <div class="masthead-right">{volume}<br>{short_date}</div>
+  </header>
+'''
+
+
+def _build_hero(data):
+    """HERO：固定标题，隐喻只在金句卡里出现"""
+    user_name = data.get('user_name', '')
+    hero_title = data.get('hero_title') or '在不确定中<br>设计属于自己的人生'
+    hero_subtitle = data.get('hero_subtitle') or '基于斯坦福 Life Design Lab 方法论，与你共同完成的一份人生设计蓝图。'
+    date = data.get('date', datetime.now().strftime('%Y 年 %m 月 %d 日'))
+    return f'''
+  <section class="hero">
+    <div class="hero-label">Personal Odyssey Report</div>
+    <h1 class="hero-title">{hero_title}</h1>
+    <p class="hero-subtitle">{hero_subtitle}</p>
+    <div class="hero-meta">Generated for {user_name} · {date}</div>
+  </section>
+
+  <div class="divider"></div>
+'''
+
+
+def _build_appointment(data):
+    """结尾"时间胶囊"说明 — 明确告诉用户封存了什么、什么时候收到"""
+    cap = data.get('capsule') or {}
+    d30 = cap.get('trigger_at_d30') or ''
+    if not d30 and cap:
+        d30 = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d')
+    if not d30:
+        return ''
+    date_display = d30
+    try:
+        d = datetime.strptime(d30, '%Y-%m-%d')
+        weekday_cn = '一二三四五六日'[d.weekday()]
+        date_display = d.strftime('%Y 年 %m 月 %d 日') + f' · 星期{weekday_cn}'
+    except Exception:
+        pass
+    return f'''
+  <div class="divider-dot"></div>
+
+  <section class="appointment">
+    <p class="appointment-desc">
+      你刚刚在对话的最后，选择封存了一封写给未来自己的信。<br>
+      这封信里记录了你此刻的真实想法、你的犹豫、你的期待。
+    </p>
+    <div class="appointment-date">{date_display}</div>
+    <p class="appointment-hint">
+      30 天后，这封信会自动送达。<br>
+      到时候你会收到提醒——打开它，看看一个月前的自己。
+    </p>
+  </section>
+'''
+
+
+def _build_md_actions():
+    """底部：复制 md / 下载 md 两个按钮"""
+    return '''
+  <div class="md-actions">
+    <button class="md-btn" onclick="__copyMd(this)">复制为 Markdown</button>
+    <button class="md-btn" onclick="__downloadMd()">下载 .md</button>
+  </div>
+'''
+
+
+MD_EMBED_SCRIPT = r'''
+<script>
+function __getMd() {
+  var el = document.getElementById('blueprint-md');
+  return el ? el.textContent.replace(/^\s+/, '') : '';
+}
+function __copyMd(btn) {
+  var md = __getMd();
+  if (!md) { btn.textContent = '(无 Markdown 内容)'; return; }
+  navigator.clipboard.writeText(md).then(function() {
+    var orig = btn.textContent;
+    btn.textContent = '✓ 已复制';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+  }).catch(function() {
+    btn.textContent = '复制失败';
+    setTimeout(function(){ btn.textContent = '复制为 Markdown'; }, 2000);
+  });
+}
+function __downloadMd() {
+  var md = __getMd();
+  if (!md) return;
+  var name = document.title.replace(/\s*·.*$/, '').replace(/[\/\\:*?"<>|]/g, '_') + '.md';
+  var blob = new Blob([md], {type: 'text/markdown;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.classList && e.target.classList.contains('timeline-check')) {
+    e.target.classList.toggle('checked');
+  }
+});
+function toggleOdyssey(card) {
+  var plan = card.getAttribute('data-plan');
+  var panel = document.getElementById('odyssey-panel');
+  var inner = document.getElementById('odyssey-panel-inner');
+  var isActive = card.classList.contains('active');
+
+  // 清除所有卡片的 active 状态
+  var cards = document.querySelectorAll('.odyssey-card');
+  for (var i = 0; i < cards.length; i++) { cards[i].classList.remove('active'); }
+
+  if (isActive) {
+    // 点击已激活的卡片 → 关闭
+    panel.classList.remove('active');
+    panel.style.borderTopColor = '';
+    return;
+  }
+
+  // 激活当前卡片
+  card.classList.add('active');
+  var data = (typeof __odysseyPlans !== 'undefined') ? __odysseyPlans[plan] : null;
+  if (!data) return;
+
+  // 设置面板边框颜色
+  panel.style.borderTopColor = data.color;
+
+  // 构建面板内容
+  var html = '';
+  // 左栏：标题 + 描述 + 时间线
+  html += '<div class="odyssey-timeline-col">';
+  if (data.title) {
+    html += '<h3 style="font-family:var(--serif);font-size:1.1rem;margin:0 0 12px;color:var(--plan-color,' + data.color + ')">' + data.title + '</h3>';
+  }
+  if (data.body) {
+    html += '<div style="font-size:0.88rem;line-height:1.8;color:var(--stone);margin-bottom:16px">' + data.body + '</div>';
+  }
+  if (data.timeline) {
+    html += '<div class="odyssey-detail-label">时间线 · TIMELINE</div>';
+    html += '<div class="odyssey-timeline">' + data.timeline + '</div>';
+  }
+  html += '</div>';
+  // 右栏：想问自己
+  html += '<div class="odyssey-questions-col">';
+  html += '<div class="odyssey-detail-label">想问自己 · QUESTIONS</div>';
+  if (data.questions && data.questions.length) {
+    html += '<ul class="odyssey-detail-questions" style="--plan-color:' + data.color + '">';
+    for (var j = 0; j < data.questions.length; j++) {
+      var q = data.questions[j] || '';
+      // 转义 HTML 特殊字符
+      q = q.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      html += '<li>' + q + '</li>';
+    }
+    html += '</ul>';
+  }
+  html += '</div>';
+  inner.innerHTML = html;
+
+  // 展开面板
+  panel.classList.add('active');
+
+  // 平滑滚动到面板
+  setTimeout(function() {
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
+</script>
+'''
+
+
+def generate_report(data, embedded_md=""):
+    """
+    从富文本 JSON 生成完整 HTML 报告（style-c 禅意基调 · P1 三层加密）。
+    embedded_md：可选的 Markdown 全文，会内嵌到 <script type="text/markdown"> 里。
     """
     date = data.get('date', datetime.now().strftime('%Y年%m月%d日'))
-    user_name = data.get('user_name', '')
+    user_name = data.get('user_name', '朋友')
 
-    sections_html = ''
+    parts = []
+    parts.append(_build_masthead(data))
+    parts.append(_build_hero(data))
 
-    # 01 - 你在这里
-    dashboard = data.get('dashboard', {})
-    if dashboard:
-        sections_html += build_section(1, '你在这里', build_dashboard_html(dashboard))
+    if data.get('dashboard'):
+        parts.append(build_section(1, '你在这里',
+            build_dashboard_html(data['dashboard']),
+            epigraph=_pick_epigraph_for('dashboard', data)))
 
-    # 对话金句卡（如果有）
-    golden_quote = data.get('golden_quote')
-    if golden_quote:
-        sections_html += build_quote_card_html(golden_quote)
+    if data.get('golden_quote'):
+        parts.append(build_quote_card_html(data['golden_quote']))
 
-    # 02 - 真问题
-    reframe = data.get('reframe', {})
-    if reframe:
-        sections_html += build_section(2, '真问题', build_reframe_html(reframe))
+    parts.append('<div class="divider"></div>')
 
-    # 03 - 你的指南针
-    compass = data.get('compass', {})
-    if compass:
-        sections_html += build_section(3, '你的指南针', build_compass_html(compass))
+    if data.get('reframe'):
+        parts.append(build_section(2, '真问题',
+            build_reframe_html(data['reframe']),
+            epigraph=_pick_epigraph_for('reframe', data)))
 
-    # 04 - 你的能量地图
-    energy = data.get('energy', {})
-    if energy:
-        sections_html += build_section(4, '你的能量地图', build_energy_html(energy))
+    parts.append('<div class="divider-dot"></div>')
 
-    # 05 - 三个奥德赛计划
-    odyssey = data.get('odyssey', {})
-    if odyssey:
-        sections_html += build_section(5, '三个奥德赛计划', build_odyssey_html(odyssey))
+    if data.get('compass'):
+        parts.append(build_section(3, '你的指南针',
+            build_compass_html(data['compass']),
+            epigraph=_pick_epigraph_for('compass', data)))
 
-    # 06 - 原型行动清单
-    actions = data.get('actions', {})
-    if actions:
-        sections_html += build_section(6, '原型行动清单', build_actions_html(actions))
+    parts.append('<div class="divider"></div>')
 
-    # 给6个月后自己的一封信
-    future_letter = data.get('future_letter')
-    if future_letter:
-        sections_html += build_future_letter_html(future_letter)
+    if data.get('energy'):
+        parts.append(build_section(4, '你的能量地图',
+            build_energy_html(data['energy']),
+            epigraph=_pick_epigraph_for('energy', data)))
 
-    # 07 - 失败免疫
-    closing = data.get('closing', {})
-    if closing:
-        sections_html += build_section(7, '失败免疫', build_closing_html(closing))
+    parts.append('<div class="divider-dot"></div>')
+
+    if data.get('odyssey'):
+        parts.append(build_section(5, '三个奥德赛计划',
+            build_odyssey_html(data['odyssey']),
+            epigraph=_pick_epigraph_for('odyssey', data)))
+
+    parts.append('<div class="divider"></div>')
+
+    if data.get('actions'):
+        parts.append(build_section(6, '接下来 30 天',
+            build_actions_html(data['actions']),
+            epigraph=_pick_epigraph_for('actions', data)))
+
+    if data.get('future_letter'):
+        parts.append(build_future_letter_html(data['future_letter']))
+
+    parts.append('<div class="divider"></div>')
+
+    if data.get('closing'):
+        parts.append(build_section(7, '失败免疫',
+            build_closing_html(data['closing']),
+            epigraph=_pick_epigraph_for('closing', data)))
+
+    parts.append(_build_appointment(data))
+    parts.append(_build_md_actions())
+
+    sections_html = '\n'.join(parts)
 
     css = build_css()
+
+    md_block = ""
+    if embedded_md:
+        safe_md = embedded_md.replace('</script>', '<\\/script>')
+        md_block = f'<script type="text/markdown" id="blueprint-md">\n{safe_md}\n</script>\n'
 
     html = f'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>个人人生设计蓝图 — {user_name}</title>
+<title>个人人生设计蓝图 · {user_name}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>{css}</style>
 </head>
 <body>
-<div class="container">
-
-  <header class="report-header">
-    <div class="label">LIFE DESIGN BLUEPRINT</div>
-    <h1>个人人生设计蓝图</h1>
-    <div class="subtitle">基于斯坦福 Life Design Lab 方法论的深度自我探索报告</div>
-    <div class="accent-line"></div>
-    <div class="meta">
-      <span>{user_name}</span>
-      <span>{date}</span>
-    </div>
-  </header>
-
+<div class="page">
 {sections_html}
 
-  <footer class="report-footer">
-    LIFE DESIGN BLUEPRINT · Based on Stanford d.school Life Design Lab Methodology · {date}
+  <footer class="footer">
+    <div class="footer-text">
+      Life Design Blueprint · 基于斯坦福 Life Design Lab 方法论<br>
+      Generated with care · {date}
+    </div>
   </footer>
 
 </div>
+{md_block}{MD_EMBED_SCRIPT}
 </body>
 </html>
 '''
     return html
 
 
+
+# ============================================================
+# 时间胶囊 & 定时回信调度
+# ============================================================
+
+def _make_capsule_id(user_name: str, sealed_at: str) -> str:
+    """生成人类可读的短口令，例：LD-2607-7A9F"""
+    yy = sealed_at[2:4]
+    mm = sealed_at[5:7]
+    raw = f"{user_name}|{sealed_at}|{os.urandom(4).hex()}"
+    tail = hashlib.sha256(raw.encode('utf-8')).hexdigest()[:4].upper()
+    return f"LD-{yy}{mm}-{tail}"
+
+
+def seal_capsule(data: dict, output_dir: str) -> dict:
+    """
+    从对话数据里提取 5 个字段，封存为时间胶囊 JSON。
+    30 天 / 90 天后由平台 scheduler 触发回信时读取。
+
+    需要 AI 在 JSON 里额外提供 capsule 字段（见 schema 说明）；
+    若缺失，尝试从 golden_quote / reframe 等已有字段兜底提取。
+    """
+    sealed_at = datetime.now().strftime('%Y-%m-%d')
+    user_name = data.get('user_name', '朋友')
+
+    # 优先读 AI 显式填的 capsule 字段
+    src = data.get('capsule', {}) or {}
+
+    # 兜底：从其他字段推断
+    quote = src.get('quote') or (data.get('golden_quote') or {}).get('text', '')
+    avoided_topic = src.get('avoided_topic', '')
+    contradiction = src.get('contradiction') or (data.get('reframe') or {}).get('real', '')
+    metaphor = src.get('user_signature_metaphor', '')
+
+    # chosen_prototype 从 actions 里挑一个
+    chosen = src.get('chosen_prototype', '')
+    if not chosen:
+        actions = data.get('actions', {}) or {}
+        for key in ('talk', 'try', 'step', 'habit'):
+            arr = actions.get(key) or []
+            if arr:
+                chosen = arr[0] if isinstance(arr[0], str) else (arr[0].get('what') or '')
+                if chosen:
+                    break
+
+    capsule_id = src.get('capsule_id') or _make_capsule_id(user_name, sealed_at)
+    d30 = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d')
+    d90 = (datetime.now() + timedelta(days=90)).strftime('%Y-%m-%d')
+
+    capsule = {
+        "schema_version": 1,
+        "capsule_id": capsule_id,
+        "user_name": user_name,
+        "sealed_at": sealed_at,
+        "trigger_at_d30": d30,
+        "trigger_at_d90": d90,
+        "quote": quote,
+        "avoided_topic": avoided_topic,
+        "contradiction": contradiction,
+        "chosen_prototype": chosen,
+        "user_signature_metaphor": metaphor,
+    }
+
+    # 写盘：<output_dir>/capsules/<capsule_id>.json
+    capsule_dir = os.path.join(output_dir, 'capsules')
+    os.makedirs(capsule_dir, exist_ok=True)
+    capsule_path = os.path.join(capsule_dir, f'{capsule_id}.json')
+    with open(capsule_path, 'w', encoding='utf-8') as f:
+        json.dump(capsule, f, ensure_ascii=False, indent=2)
+
+    return {"capsule": capsule, "path": capsule_path}
+
+
+def schedule_letters(capsule: dict, dry_run: bool = False) -> list:
+    """
+    调用平台 schedule-creator，为 30 天 / 90 天两次回信下调度。
+
+    关键设计：capsule 全量字段以 JSON 字符串塞进 query 参数里，
+    即便 30 天后 skill 目录被清空，也能从调度 payload 里恢复。
+
+    返回一个列表，每项 {"phase": "d30", "cmd": [...], "ok": bool, "output": "..."}。
+    dry_run=True 时只打印命令、不真的调用。
+    """
+    results = []
+    payload_min = {
+        "cid": capsule["capsule_id"],
+        "u": capsule.get("user_name", ""),
+        "q": capsule.get("quote", ""),
+        "a": capsule.get("avoided_topic", ""),
+        "c": capsule.get("contradiction", ""),
+        "p": capsule.get("chosen_prototype", ""),
+        "m": capsule.get("user_signature_metaphor", ""),
+        "s": capsule.get("sealed_at", ""),
+    }
+    payload_str = json.dumps(payload_min, ensure_ascii=False, separators=(',', ':'))
+
+    for phase, when_days, when_desc in [("d30", 30, "30 天后"), ("d90", 90, "90 天后")]:
+        query = (
+            f"[life-designer 时间胶囊回信] phase={phase} "
+            f"capsule_id={capsule['capsule_id']} payload={payload_str}"
+        )
+        cmd = [
+            "schedule-creator", "add",
+            "--when", f"{when_days} days later",
+            "--title", f"Life Designer · {when_desc}的一封信",
+            "--query", query,
+        ]
+        if dry_run:
+            results.append({"phase": phase, "cmd": cmd, "ok": True, "output": "(dry-run)"})
+            continue
+        try:
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            results.append({
+                "phase": phase,
+                "cmd": cmd,
+                "ok": proc.returncode == 0,
+                "output": (proc.stdout or '') + (proc.stderr or ''),
+            })
+        except FileNotFoundError:
+            # 沙箱里没有 schedule-creator 可执行文件属正常，返回一个明确标记
+            results.append({
+                "phase": phase,
+                "cmd": cmd,
+                "ok": False,
+                "output": "schedule-creator not found in PATH (由主 agent 代为下调度)",
+            })
+        except Exception as e:
+            results.append({"phase": phase, "cmd": cmd, "ok": False, "output": str(e)})
+    return results
+
+
 def generate_demo_data():
     """生成示范数据，展示完整 JSON 结构"""
     return {
-        "user_name": "陈柯宇",
+        "user_name": "朋友",
         "date": "2026年7月8日",
         "dashboard": {
             "narrative": "<p>你走进来的时候说了一句话：「我觉得工作还行但很迷茫」。这句话里藏着两个声音——一个在说「我能做」，另一个在说「但做了又怎样」。</p><p>下面四个维度的打分，帮我们把这个模糊的感觉变成了可以看清的画面。</p>",
@@ -1343,11 +1803,11 @@ def generate_demo_data():
                 "散步时听播客，偶尔停下来记个笔记",
                 "周末早上不赶时间地泡一杯咖啡，什么都不做"
             ],
-            "drain": [
+            "drain_but_good": [
                 "写周报和项目管理文档——做得好但每次做完都像被抽干",
                 "开没有结论的会——时间花了但什么都没推进"
             ],
-            "direction": [
+            "lean_toward": [
                 "造东西（把模糊的想法变成具体的产品/内容）",
                 "帮人看清问题（把复杂的事说简单，让对方有顿悟感）"
             ],
@@ -1359,6 +1819,7 @@ def generate_demo_data():
             "plans": [
                 {
                     "title": "产品管理者",
+                    "body": "留在现有公司，从项目管理转向产品方向。稳定收入 + 系统方法论积累。风险低，但成长曲线较缓。适合「先稳住再找方向」的阶段。",
                     "timeline": "<p><strong>第1年：</strong>在现有公司争取一个产品方向负责人的角色，开始从「管项目」转向「做产品」。</p><p><strong>第2-3年：</strong>积累产品方法论，带一个小团队做出一个有用户口碑的产品。</p><p><strong>第4-5年：</strong>成为某个垂直领域的产品负责人，开始思考自己的产品方向。</p>",
                     "questions": [
                         "在现有公司有没有可能从项目管理转向产品方向？需要什么条件？",
@@ -1368,6 +1829,7 @@ def generate_demo_data():
                 },
                 {
                     "title": "独立产品人",
+                    "body": "用业余时间验证产品想法，逐步过渡到全职独立。核心是「用最小成本试错」。收入不稳定但自由度高。适合「脑子里已经有一个想法在烧」的状态。",
                     "timeline": "<p><strong>第1年：</strong>利用业余时间做第一个小产品。不辞职，用晚上和周末验证。做到有 100 个真实用户。</p><p><strong>第2年：</strong>如果产品有正反馈，开始认真考虑全职做。加入一个创业团队或者自己做。</p><p><strong>第3-5年：</strong>成为一个独立产品人。有自己的产品，有自己的用户，靠产品养活自己。</p>",
                     "questions": [
                         "你脑子里有没有一个具体产品想法，已经想了很久但一直没做？",
@@ -1377,6 +1839,7 @@ def generate_demo_data():
                 },
                 {
                     "title": "产品创作者 + 教育者",
+                    "body": "写作 + 做产品双线并行。内容帮你建立影响力，产品帮你验证想法。前期投入大、回报慢，但一旦飞轮转起来，天花板最高。适合「愿意用三年换一个事业」的人。",
                     "timeline": "<p><strong>第1年：</strong>开始写产品相关的文章/播客。不辞职。目标是找到你的声音和受众。</p><p><strong>第2-3年：</strong>内容和产品双线并行。写东西帮你梳理思路，做产品帮你验证想法。</p><p><strong>第4-5年：</strong>成为产品领域的创作者——有自己的社群，教别人做产品，同时自己做产品。</p>",
                     "questions": [
                         "你有没有想过把你帮朋友做产品的那个下午，变成一种日常？",
@@ -1404,7 +1867,7 @@ def generate_demo_data():
         },
         "future_letter": {
             "date": "2027年1月8日",
-            "body": "<p>亲爱的半年后的我：</p><p>如果你正在读这封信，说明你至少活了六个月。</p><p>六个月前的你，在一个周三的晚上，跟一个 AI 聊了快一个小时。你说你像跑步机——跑得很快但原地不动。那天晚上你做了一个决定：今晚写三句话。</p><p>我不知道你写了没有。我也不知道你做了那个产品没有。但我知道一件事：你愿意认真想这个问题，本身就说明你还在乎。</p><p>如果你已经开始做了——不管做得好不好——你已经比六个月前的自己勇敢了太多。</p><p>如果你还没开始——也没关系。你还有下一个六个月。人生不是考试，没有过期。</p><p>但请你现在做一件事：回想一下那天晚上聊天时，你说到帮朋友做产品那个下午时你的语气。那个语气里的你，才是你。</p><p>去找他。</p>"
+            "body": "<p>亲爱的半年后的我：</p><p>写这封信的时候，是一个周三的晚上。你刚跟一个 AI 聊了快一个小时。你说你像跑步机——跑得很快但原地不动。那天晚上你做了一个决定：今晚写三句话。</p><p>我不知道你写了没有。我也不知道你做了那个产品没有。但我知道一件事：你愿意认真想这个问题，本身就说明你还在乎。</p><p>如果你已经开始做了——不管做得好不好——你已经比半年前的自己勇敢了太多。</p><p>如果你还没开始——也没关系。人生不是考试，没有过期。</p><p>但请你现在做一件事：回想一下那天晚上聊天时，你说到帮朋友做产品那个下午时你的语气。那个语气里的你，才是你。</p><p>去找他。</p>"
         },
         "closing": {
             "narrative": "<p>你有三个版本可以试。你不需要选最好的那个——你只需要选一个先走。</p><p>走不通就换一个。这不是考试，没有不及格。</p><p>你今天做的最重要的事不是得到了三个计划。而是——你终于允许自己去想「我还可以活成另一种样子」。</p><p>那个可能性一直都在。你只是今天第一次认真地看了它一眼。</p><p>去写那三句话吧。今晚就好。</p>",
@@ -1412,6 +1875,14 @@ def generate_demo_data():
                 "text": "「人生不是我们发现了什么，而是我们创造了什么。你不是在寻找一条已有的路——你在开辟一条只属于你的路。」",
                 "author": "— Bill Burnett & Dave Evans, Designing Your Life"
             }
+        },
+        "capsule_confirmed": True,
+        "capsule": {
+            "quote": "我像个跑步机——跑得很快但原地不动",
+            "avoided_topic": "跟妈妈的关系",
+            "contradiction": "嘴上要稳定，兴奋的全是冒险",
+            "chosen_prototype": "用4个周末做脑子里那个产品的最小版本",
+            "user_signature_metaphor": "跑步机"
         }
     }
 
@@ -1458,6 +1929,10 @@ JSON 结构（富文本区块，不再是原子占位符）：
     parser.add_argument('--output', '-o', help='输出 HTML 文件路径（默认自动生成）')
     parser.add_argument('--demo', '-d', action='store_true', help='使用示范数据生成示例报告')
     parser.add_argument('--quiet', '-q', action='store_true', help='安静模式')
+    parser.add_argument('--no-capsule', action='store_true',
+                        help='不封存时间胶囊、不下 30/90 天调度（默认封存 + 下调度）')
+    parser.add_argument('--dry-run-schedule', action='store_true',
+                        help='胶囊照常封存，但只打印 schedule-creator 命令、不真的调用')
 
     args = parser.parse_args()
 
@@ -1479,8 +1954,16 @@ JSON 结构（富文本区块，不再是原子占位符）：
         parser.print_help()
         sys.exit(0)
 
-    # 生成报告
-    report_html = generate_report(data)
+    # 先生成 Markdown（双载体：本地文件 + 内嵌 HTML）
+    try:
+        from markdown_generator import generate_markdown
+        md_text = generate_markdown(data)
+    except Exception as e:
+        print(f'⚠️ Markdown 生成失败（HTML 会照常继续）：{e}', file=sys.stderr)
+        md_text = ''
+
+    # 生成 HTML（把 md 内嵌进去，供页面上"复制/下载"用）
+    report_html = generate_report(data, embedded_md=md_text)
 
     # 确定输出路径
     if not args.output:
@@ -1490,22 +1973,72 @@ JSON 结构（富文本区块，不再是原子占位符）：
         date_str = datetime.now().strftime('%Y%m%d')
         args.output = os.path.join(output_dir, f'人生设计蓝图_{user_name}_{date_str}.html')
 
-    # 写入
+    # 写入 HTML
     os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
     with open(args.output, 'w', encoding='utf-8') as f:
         f.write(report_html)
+
+    # 同时落一份 .md 到 HTML 所在目录（供本地阅读 / 版本控制）
+    md_path = ''
+    if md_text:
+        md_path = os.path.splitext(args.output)[0] + '.md'
+        with open(md_path, 'w', encoding='utf-8') as f:
+            f.write(md_text)
 
     if args.quiet:
         print(args.output)
     else:
         print(f'✅ 报告已生成：{args.output}')
         print(f'   文件大小：{os.path.getsize(args.output):,} 字节')
+        if md_path:
+            md_chars = len(md_text.replace('\n', '').replace(' ', ''))
+            print(f'📝 Markdown 已生成：{md_path}（{md_chars} 字，同时已内嵌到 HTML）')
         section_count = sum(1 for k in ['dashboard','reframe','compass','energy','odyssey','actions','closing'] if k in data)
         print(f'   章节数：{section_count}/7')
         if data.get('golden_quote'):
             print(f'   金句卡：✅')
         if data.get('future_letter'):
             print(f'   给未来的信：✅')
+
+    # ============================================================
+    # 时间胶囊：封存 + 下 30/90 天两次回信调度
+    # 只有用户在对话结束时确认了（capsule_confirmed: true）才封存
+    # ============================================================
+    capsule_confirmed = data.get('capsule_confirmed', False)
+    if not args.no_capsule and not args.demo and capsule_confirmed:
+        output_dir = os.path.dirname(os.path.abspath(args.output))
+        sealed = seal_capsule(data, output_dir)
+        capsule = sealed["capsule"]
+        if not args.quiet:
+            print(f'📮 时间胶囊已封存：{sealed["path"]}')
+            print(f'   capsule_id：{capsule["capsule_id"]}')
+            print(f'   30 天触发：{capsule["trigger_at_d30"]}')
+            print(f'   90 天触发：{capsule["trigger_at_d90"]}')
+
+        results = schedule_letters(capsule, dry_run=args.dry_run_schedule)
+        for r in results:
+            mark = '✅' if r['ok'] else '⚠️'
+            if not args.quiet:
+                print(f'{mark} 调度 {r["phase"]}：{r["output"].strip()[:120]}')
+
+        # 关键兜底：如果 schedule-creator CLI 不在本机 PATH，
+        # 说明当前是在 skill 内直接跑脚本、平台调度需要主 agent 代下。
+        # 把待下调度的完整 query 写到 sidecar 文件，让上层 agent 读取后调用。
+        if any(not r['ok'] for r in results):
+            sidecar = os.path.join(output_dir, 'capsules',
+                                   f'{capsule["capsule_id"]}.pending_schedules.json')
+            with open(sidecar, 'w', encoding='utf-8') as f:
+                json.dump({
+                    "capsule_id": capsule["capsule_id"],
+                    "note": "schedule-creator 未在脚本环境中可用，请由主 agent 读取本文件并调用 schedule-creator skill 下调度。",
+                    "schedules": [
+                        {"phase": r["phase"], "cmd": r["cmd"]} for r in results if not r['ok']
+                    ],
+                }, f, ensure_ascii=False, indent=2)
+            if not args.quiet:
+                print(f'📎 已写出 pending_schedules 兜底文件：{sidecar}')
+    elif not args.quiet and not args.demo and not capsule_confirmed:
+        print('⏭️  时间胶囊未封存（用户未确认，跳过）')
 
 
 if __name__ == '__main__':
