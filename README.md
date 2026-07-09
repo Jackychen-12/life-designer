@@ -25,7 +25,7 @@
 
 <p align="center">
   <a href="https://jackychen-12.github.io/life-designer/">
-    <img src="docs/preview.png" alt="Life Design Blueprint Demo" width="800">
+    <img src="https://raw.githubusercontent.com/Jackychen-12/life-designer/main/docs/preview.png" alt="Life Design Blueprint Demo" width="800">
   </a>
 </p>
 
