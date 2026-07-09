@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人人生设计蓝图 · 朋友</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FAFAF8;
+  --ink: #1A1A1A;
+  --ink-2: #2A2A28;
+  --stone: #6B6B6B;
+  --mist: #B8B4AC;
+  --paper: #F0EDE6;
+  --paper-2: #E8E4DA;
+  --accent: #2B4C7E;
+  --accent-soft: #D4DFEB;
+  --accent-line: rgba(43, 76, 126, 0.18);
+  --rule: #D8D4CC;
+  --rule-hair: #E5E1D9;
+  --serif: 'Noto Serif SC', 'Source Serif 4', serif;
+  --sans: 'Noto Sans SC', 'Inter', sans-serif;
+  --mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 300;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 纸质噪点纹理 —— style-c 灵魂之一 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* ─── MASTHEAD ─── */
+.masthead {
+  padding: 48px 0 36px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.masthead-left {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--stone);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+.masthead-right {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--mist);
+  text-align: right;
+  letter-spacing: 0.1em;
+  line-height: 1.6;
+}
+
+/* ─── HERO ─── */
+.hero {
+  padding: 64px 0 48px;
+  text-align: center;
+}
+.hero-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.hero-title {
+  font-family: var(--serif);
+  font-size: 2.4rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+}
+.hero-subtitle {
+  font-size: 1rem;
+  color: var(--stone);
+  font-weight: 400;
+  max-width: 440px;
+  margin: 0 auto;
+  line-height: 1.75;
+}
+.hero-meta {
+  margin-top: 32px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--mist);
+  letter-spacing: 0.1em;
+}
+
+/* ─── DIVIDER ─── */
+.divider {
+  width: 40px;
+  height: 1px;
+  background: var(--rule);
+  margin: 40px auto;
+}
+.divider-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--mist);
+  margin: 40px auto;
+}
+
+/* ─── SECTION ─── */
+.section {
+  padding: 32px 0;
+}
+.section-number {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.2em;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+.section-body {
+  font-size: 1rem;
+  color: var(--ink);
+  line-height: 1.8;
+}
+.section-body p {
+  margin-bottom: 1em;
+}
+.section-body strong { font-weight: 500; color: var(--ink-2); }
+.section-body em { font-style: italic; color: var(--stone); }
+
+/* 章节题记（P1 新增：section 标题下的用户原话） */
+.section-epigraph {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--stone);
+  border-left: 1px solid var(--accent-line);
+  padding: 4px 0 4px 18px;
+  margin: -4px 0 20px 0;
+  line-height: 1.7;
+  max-width: 560px;
+}
+.section-epigraph .attr {
+  display: block;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+/* ─── KPI STRIP ─── */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  margin: 28px 0 12px;
+}
+.kpi {
+  padding: 28px 12px;
+  text-align: center;
+  border-right: 1px solid var(--rule);
+}
+.kpi:last-child { border-right: none; }
+.kpi-value {
+  font-family: var(--mono);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.kpi-value::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--kpi-color, var(--accent));
+  margin-right: 6px;
+  vertical-align: middle;
+  position: relative;
+  top: -2px;
+}
+.kpi-label {
+  font-family: var(--serif);
+  font-size: 0.8rem;
+  color: var(--stone);
+  letter-spacing: 0.08em;
+}
+
+/* KPI 注解（P1 新增：每个分数下一句 mono 小字） */
+.kpi-notes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--rule-hair);
+}
+.kpi-note {
+  padding: 12px 16px 20px;
+  border-right: 1px solid var(--rule-hair);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  line-height: 1.7;
+  color: var(--stone);
+  text-align: center;
+}
+.kpi-note:last-child { border-right: none; }
+
+/* ─── INSIGHT (简约内联) ─── */
+.insight-card {
+  margin: 20px 0;
+  padding: 0;
+}
+.insight-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--stone);
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.insight-text {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: var(--ink-2);
+}
+
+/* ─── PULL QUOTE ─── */
+.pull-quote {
+  padding: 32px 0;
+  text-align: center;
+}
+.pull-quote-mark {
+  font-family: var(--serif);
+  font-size: 3rem;
+  color: var(--accent-soft);
+  line-height: 1;
+  margin-bottom: -12px;
+}
+.pull-quote-text {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 0 auto;
+  color: var(--ink);
+}
+.pull-quote-source {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--mist);
+  letter-spacing: 0.1em;
+}
+
+/* ─── SCORE BARS ─── */
+.score-bars {
+  margin: 24px 0 8px;
+}
+.score-bar {
+  display: grid;
+  grid-template-columns: 48px 1fr 36px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+}
+.score-bar-label {
+  font-family: var(--serif);
+  font-size: 0.88rem;
+  color: var(--ink);
+  font-weight: 500;
+}
+.score-bar-track {
+  height: 4px;
+  background: var(--rule-hair);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.score-bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+.score-bar-val {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--stone);
+  text-align: right;
+}
+
+/* ─── REFRAME 四步对照（P1 新增） ─── */
+.reframe-grid {
+  margin: 24px 0;
+  padding: 24px 28px;
+  background: var(--paper);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1.9;
+}
+.reframe-row {
+  display: grid;
+  grid-template-columns: 130px 20px 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 4px 0;
+}
+.reframe-key {
+  color: var(--mist);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+.reframe-arrow {
+  color: var(--accent);
+  text-align: center;
+}
+.reframe-val {
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+.reframe-val.real { font-weight: 500; color: var(--accent); }
+
+/* ─── COMPASS 罗盘对齐（P1 增强） ─── */
+.compass-pair {
+  display: grid;
+  grid-template-columns: 1fr 20px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin: 24px 0 16px;
+  padding: 24px 0;
+  border-top: 1px solid var(--rule-hair);
+  border-bottom: 1px solid var(--rule-hair);
+}
+.compass-cell { text-align: center; padding: 0 8px; }
+.compass-cell-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.compass-cell-text {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--ink);
+}
+.compass-connector {
+  font-family: var(--mono);
+  color: var(--accent);
+  text-align: center;
+  font-size: 1.2rem;
+}
+.compass-verdict {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-top: 4px;
+}
+
+/* ─── ENERGY 2x2 网格（P1 新增） ─── */
+.energy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+  margin: 24px 0;
+}
+.energy-cell {
+  padding: 20px 20px;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  min-height: 120px;
+}
+.energy-cell-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.energy-cell-list {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  line-height: 1.9;
+  color: var(--ink);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.energy-cell-list li { padding: 3px 0; }
+.energy-cell-list li::before {
+  content: '·';
+  color: var(--accent);
+  margin-right: 10px;
+  font-weight: 700;
+}
+
+/* ─── ODYSSEY ─── */
+.odyssey-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin: 32px 0 0;
+}
+.odyssey-card {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--plan-color, var(--accent));
+  padding: 20px 18px;
+  position: relative;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.odyssey-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+.odyssey-card.active {
+  border-color: var(--plan-color, var(--accent));
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+.odyssey-card::before {
+  content: attr(data-plan);
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-family: var(--mono);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--plan-color, var(--accent));
+  opacity: 0.1;
+  line-height: 1;
+}
+.odyssey-tag {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--plan-color, var(--accent));
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.odyssey-title {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+  line-height: 1.35;
+}
+.odyssey-body {
+  font-size: 0.85rem;
+  color: var(--stone);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.odyssey-card-hint {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--mist);
+  text-align: right;
+  margin-top: 10px;
+  letter-spacing: 0.06em;
+  transition: color 0.2s;
+}
+.odyssey-card:hover .odyssey-card-hint { color: var(--plan-color, var(--accent)); }
+.odyssey-card.active .odyssey-card-hint { display: none; }
+
+/* 全宽详情面板 */
+.odyssey-detail-full {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.35s ease, margin 0.35s ease;
+  opacity: 0;
+  margin-top: 0;
+  border: 1px solid transparent;
+  border-top: 3px solid var(--accent);
+  background: var(--bg);
+}
+.odyssey-detail-full.active {
+  max-height: 1200px;
+  opacity: 1;
+  margin-top: 24px;
+  border-color: var(--rule);
+}
+.odyssey-detail-label {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--mist);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.odyssey-detail-inner {
+  padding: 28px 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+/* 奥德赛时间线 */
+.odyssey-timeline {
+  padding: 0;
+  background: none;
+  font-size: 0.88rem;
+  line-height: 1.9;
+  color: var(--ink);
+}
+.odyssey-timeline p { margin-bottom: 12px; }
+.odyssey-timeline p:last-child { margin-bottom: 0; }
+.odyssey-timeline .yr {
+  color: var(--plan-color, var(--accent));
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin-right: 8px;
+}
+
+.odyssey-detail-questions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.odyssey-detail-questions li {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--ink);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule-hair);
+  line-height: 1.6;
+}
+.odyssey-detail-questions li:last-child { border-bottom: none; }
+.odyssey-detail-questions li::before {
+  content: '?';
+  color: var(--plan-color, var(--accent));
+  font-weight: 600;
+  margin-right: 10px;
+  font-style: normal;
+}
+
+/* 奥德赛四维评估条 */
+.odyssey-eval {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 64px 1fr 28px;
+  gap: 8px;
+  align-items: center;
+  padding: 5px 0;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+}
+.odyssey-eval-label {
+  color: var(--mist);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.odyssey-eval-bar {
+  height: 2px;
+  background: var(--rule-hair);
+  position: relative;
+}
+.odyssey-eval-bar::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: var(--plan-color, var(--accent));
+  width: var(--val, 50%);
+}
+.odyssey-eval-val {
+  text-align: right;
+  color: var(--stone);
+}
+
+/* 奥德赛想问自己的问题 */
+.odyssey-questions {
+  margin: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--stone);
+  line-height: 1.7;
+  padding-left: 0;
+  list-style: none;
+}
+.odyssey-questions li {
+  padding: 3px 0;
+}
+.odyssey-questions li::before {
+  content: '— ';
+  color: var(--plan-color, var(--accent));
+  font-style: normal;
+}
+
+/* ─── ACTIONS 四组 timeline（P1 增强） ─── */
+.actions-group {
+  margin: 20px 0;
+}
+.actions-group-title {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule-hair);
+}
+.timeline {
+  margin: 12px 0 0;
+  position: relative;
+  padding-left: 32px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--rule);
+}
+.timeline-item {
+  position: relative;
+  padding-bottom: 22px;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -29px;
+  top: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.timeline-check {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--mist);
+  margin-top: 5px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 12px;
+  text-align: center;
+  color: transparent;
+  transition: all 0.2s;
+  user-select: none;
+}
+.timeline-check.checked {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.timeline-text {
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+/* ─── FUTURE LETTER ─── */
+.letter-wrap {
+  background: var(--paper);
+  padding: 40px 32px;
+  margin: 32px 0;
+  position: relative;
+}
+.letter-wrap::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  border: 1px solid var(--rule);
+  pointer-events: none;
+}
+.letter-date {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--mist);
+  letter-spacing: 0.1em;
+  margin-bottom: 24px;
+}
+.letter-greeting {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  margin-bottom: 24px;
+}
+.letter-body {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--ink);
+}
+.letter-body p { margin-bottom: 1em; }
+.letter-sign {
+  margin-top: 32px;
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--stone);
+}
+
+/* ─── GOLDEN QUOTE (简约内联) ─── */
+.golden-quote {
+  padding: 40px 20px;
+  margin: 24px 0;
+  text-align: center;
+}
+.golden-quote-text {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 400;
+  line-height: 1.9;
+  color: var(--ink);
+  margin: 0 0 14px;
+  font-style: italic;
+}
+.golden-quote-author {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--mist);
+  letter-spacing: 0.1em;
+}
+
+/* ─── CLOSING QUOTE (简约内联) ─── */
+.closing-quote {
+  padding: 28px 0;
+  text-align: center;
+  margin-top: 20px;
+}
+.closing-quote-line {
+  width: 20px;
+  height: 1px;
+  background: var(--mist);
+  margin: 0 auto 20px;
+}
+.closing-quote-text {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.85;
+  max-width: 480px;
+  margin: 0 auto 14px;
+  color: var(--ink);
+}
+.closing-quote-author {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--mist);
+  letter-spacing: 0.12em;
+}
+
+/* ─── APPOINTMENT：时间胶囊封存说明 ─── */
+.appointment {
+  padding: 40px 0 48px;
+  text-align: center;
+}
+.appointment-desc {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: var(--ink);
+  line-height: 1.9;
+  max-width: 440px;
+  margin: 0 auto 20px;
+}
+.appointment-date {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--stone);
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+.appointment-hint {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--mist);
+  line-height: 1.8;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* ─── MD 双载体：复制/下载按钮（P3） ─── */
+.md-actions {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 40px 0 20px;
+}
+.md-btn {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--stone);
+  background: transparent;
+  border: 1px solid var(--rule);
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.md-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--bg);
+}
+.md-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+/* ─── FOOTER ─── */
+.footer {
+  padding: 40px 0;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+.footer-text {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  line-height: 2.4;
+}
+.footer-capsule {
+  margin-top: 12px;
+  font-size: 0.6rem;
+  color: var(--mist);
+  letter-spacing: 0.1em;
+  text-transform: none;
+}
+
+/* responsive */
+@media (max-width: 640px) {
+  .page { padding: 0 24px; }
+  .hero-title { font-size: 2rem; }
+  .kpi-strip, .kpi-notes { grid-template-columns: repeat(2, 1fr); }
+  .kpi:nth-child(2), .kpi-note:nth-child(2) { border-right: none; }
+  .kpi:nth-child(1), .kpi:nth-child(2),
+  .kpi-note:nth-child(1), .kpi-note:nth-child(2) { border-bottom: 1px solid var(--rule-hair); }
+  .letter-wrap { padding: 40px 24px; }
+  .reframe-grid { padding: 24px 20px; }
+  .reframe-row { grid-template-columns: 100px 18px 1fr; }
+  .compass-pair { grid-template-columns: 1fr; }
+  .compass-connector { display: none; }
+  .energy-grid { grid-template-columns: 1fr; }
+  .odyssey-grid { grid-template-columns: 1fr; }
+  .odyssey-card::before { font-size: 2rem; }
+  .odyssey-eval { grid-template-columns: 80px 1fr 40px; }
+  .odyssey-detail-inner { grid-template-columns: 1fr; padding: 20px 18px; }
+}
+
+@media print {
+  body::before { display: none; }
+  .md-actions { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <div class="masthead-left">人生设计蓝图<br>Life Design Blueprint</div>
+    <div class="masthead-right">Nº 001<br>2026.07</div>
+  </header>
+
+
+  <section class="hero">
+    <div class="hero-label">Personal Odyssey Report</div>
+    <h1 class="hero-title">在不确定中<br>设计属于自己的人生</h1>
+    <p class="hero-subtitle">基于斯坦福 Life Design Lab 方法论，与你共同完成的一份人生设计蓝图。</p>
+    <div class="hero-meta">Generated for 朋友 · 2026年7月8日</div>
+  </section>
+
+  <div class="divider"></div>
+
+
+  <section class="section">
+    <div class="section-number">01</div>
+    <h2 class="section-title">你在这里</h2>
+    <div class="section-body">
+<p>你走进来的时候说了一句话：「我觉得工作还行但很迷茫」。这句话里藏着两个声音——一个在说「我能做」，另一个在说「但做了又怎样」。</p><p>下面四个维度的打分，帮我们把这个模糊的感觉变成了可以看清的画面。</p>
+</div>
+    <div class="kpi-strip">
+      <div class="kpi" style="--kpi-color: #5A8A62"><div class="kpi-value" style="color: #5A8A62">6</div><div class="kpi-label">健康</div></div>
+      <div class="kpi" style="--kpi-color: #C86A4A"><div class="kpi-value" style="color: #C86A4A">5</div><div class="kpi-label">工作</div></div>
+      <div class="kpi" style="--kpi-color: #4A7A9C"><div class="kpi-value" style="color: #4A7A9C">3</div><div class="kpi-label">娱乐</div></div>
+      <div class="kpi" style="--kpi-color: #7D6B52"><div class="kpi-value" style="color: #7D6B52">7</div><div class="kpi-label">爱</div></div>
+    </div>
+    <div class="kpi-notes">
+      <div class="kpi-note">身体还行，但最近睡眠不太好。你提到了好几次'累'，但没有说具体哪里累——这种模糊的疲惫感往往不是身体的，是心理的。</div>
+      <div class="kpi-note">你说工作'不差'。注意你用的词——不是'好'，是'不差'。'不差'是一个防御性的评价，说明你对工作没有负面情绪，但也找不到正面情绪。</div>
+      <div class="kpi-note">这个分数说明你的生活已经被'有用的事'填满了。纯粹为了快乐做的事，你想了很久才想出'上个月打游戏'。这不是时间问题，是你已经不允许自己'没用'了。</div>
+      <div class="kpi-note">这是你最高的分数。你有人可以打给，有连接感。这个维度是你的锚——不管工作怎么变，这个底座是稳的。</div>
+    </div>
+    <div class="section-body">
+<p>把四个分数放在一起看，有一个很清晰的模式：你的 <strong>工作和娱乐严重失衡</strong>，而且失衡的方向很值得注意——你不是因为工作太忙没时间玩，而是 <em>你已经忘了怎么玩</em>。</p><p>你的爱（7分）和健康（6分）还在支撑着你。但工作和娱乐之间的落差，指向的不是「需要休息」，而是「需要找到让你活过来的事」。</p>
+<div class="score-bars">
+  <div class="score-bar"><span class="score-bar-label">健康</span><span class="score-bar-track"><span class="score-bar-fill" style="width:60%;background:#5A8A62"></span></span><span class="score-bar-val">6/10</span></div>
+  <div class="score-bar"><span class="score-bar-label">工作</span><span class="score-bar-track"><span class="score-bar-fill" style="width:50%;background:#C86A4A"></span></span><span class="score-bar-val">5/10</span></div>
+  <div class="score-bar"><span class="score-bar-label">娱乐</span><span class="score-bar-track"><span class="score-bar-fill" style="width:30%;background:#4A7A9C"></span></span><span class="score-bar-val">3/10</span></div>
+  <div class="score-bar"><span class="score-bar-label">爱</span><span class="score-bar-track"><span class="score-bar-fill" style="width:70%;background:#7D6B52"></span></span><span class="score-bar-val">7/10</span></div>
+</div>
+
+    </div>
+  </section>
+
+
+  <div class="golden-quote">
+    <p class="golden-quote-text">"我像个跑步机——跑得很快，但原地不动。"</p>
+    <div class="golden-quote-author">— 你 · Phase 1 描述工作感受时</div>
+  </div>
+
+<div class="divider"></div>
+
+  <section class="section">
+    <div class="section-number">02</div>
+    <h2 class="section-title">真问题</h2>
+    <div class="section-body">
+<p>你说你迷茫。但聊了这么多之后，我觉得你其实不迷茫——你知道你能做什么，你缺的是「做这些跟我在乎的东西有什么关系」。</p><p>让我们把你最初以为的问题拆开看看：</p>
+</div>
+    <div class="reframe-grid">
+      <div class="reframe-row"><span class="reframe-key">你以为的</span><span class="reframe-arrow">→</span><span class="reframe-val">我不知道自己该做什么，没有方向。</span></div>
+      <div class="reframe-row"><span class="reframe-key">重力问题</span><span class="reframe-arrow">→</span><span class="reframe-val">你所在的行业确实有年龄焦虑和天花板——这是现实，不是你个人能解决的。接受它。</span></div>
+      <div class="reframe-row"><span class="reframe-key">真   问题</span><span class="reframe-arrow">→</span><span class="reframe-val real">你不是不知道该做什么。你知道你能做什么。你缺的是——做这些事跟我真正在乎的东西有什么关系？</span></div>
+      <div class="reframe-row"><span class="reframe-key">错误前提</span><span class="reframe-arrow">→</span><span class="reframe-val">「先想清楚再行动」——这个假设让你一直在想，一直在等，一直在原地转。</span></div>
+    </div>
+    <div class="section-body">
+<p>你不是在跑错方向。你是站在起跑线上，因为不确定终点在哪所以不敢跑。</p><p>但设计思维告诉你：<strong>不用知道终点。先跑起来，边跑边调整方向。</strong></p>
+
+    </div>
+  </section>
+
+<div class="divider-dot"></div>
+
+  <section class="section">
+    <div class="section-number">03</div>
+    <h2 class="section-title">你的指南针</h2>
+    <div class="section-body">
+<p>我们聊了你的工作观和人生观。有意思的是，你描述了两套完全不同的引擎：</p>
+</div>
+    <div class="compass-pair">
+      <div class="compass-cell"><div class="compass-cell-label">工作观</div><div class="compass-cell-text">工作是证明自己的方式。让家人觉得我有出息，给自己安全感。赚钱，稳定，往上走。——这是你现在的引擎，它让你跑得快。但你说了，跑到头也不想跑了。</div></div>
+      <div class="compass-connector">==</div>
+      <div class="compass-cell"><div class="compass-cell-label">人生观</div><div class="compass-cell-text">做出一个东西，真的帮到别人。哪怕只是一小群人。——你提到这个的时候用了「挺值的」。这个词的重量跟前面描述工作时用的「不差」完全不同。</div></div>
+    </div>
+    <div class="section-body">
+<p>你发现了吗？你白天在跑第一台引擎（证明自己），但晚上睡前想的是第二台（帮到别人）。</p><p>这两台引擎在你脑子里打架。你现在的痛苦不是来自「不知道该做什么」，而是来自 <strong>两个自己之间的一致性裂缝</strong>——你在过一个人的人生，心里想的是另一个人的。</p><p>你的指南针正北方向其实很清楚：<em>造东西，帮到人</em>。偏离的方向是：你目前在为「安全感」工作，而不是为「意义感」工作。</p>
+
+    </div>
+  </section>
+
+<div class="divider"></div>
+
+  <section class="section">
+    <div class="section-number">04</div>
+    <h2 class="section-title">你的能量地图</h2>
+    <div class="section-body">
+<p>我让你回忆一个完全投入、忘了时间的时刻。你几乎立刻就想到了——上周末帮朋友做小程序的那个下午。</p>
+</div>
+    <div class="energy-grid">
+      <div class="energy-cell">
+        <div class="energy-cell-label">心流时刻</div>
+        <ul class="energy-cell-list">
+          <li>帮朋友做产品原型——面对面协作，用 iPad 画图，最爽的是对方说「对对对就是这个」的瞬间</li>
+          <li>深夜一个人写文章——不是工作汇报，是写自己的想法。写完会有一种「被自己说服了」的感觉</li>
+          <li>给朋友讲一个复杂概念，看到对方眼睛亮了的那一刻</li>
+        </ul>
+      </div>
+      <div class="energy-cell">
+        <div class="energy-cell-label">回血活动</div>
+        <ul class="energy-cell-list">
+          <li>和朋友吃一顿很长的饭，聊的不是工作</li>
+          <li>散步时听播客，偶尔停下来记个笔记</li>
+          <li>周末早上不赶时间地泡一杯咖啡，什么都不做</li>
+        </ul>
+      </div>
+      <div class="energy-cell">
+        <div class="energy-cell-label">擅长但耗能</div>
+        <ul class="energy-cell-list">
+          <li>写周报和项目管理文档——做得好但每次做完都像被抽干</li>
+          <li>开没有结论的会——时间花了但什么都没推进</li>
+        </ul>
+      </div>
+      <div class="energy-cell">
+        <div class="energy-cell-label">偏  向</div>
+        <ul class="energy-cell-list">
+          <li>造东西（把模糊的想法变成具体的产品/内容）</li>
+          <li>帮人看清问题（把复杂的事说简单，让对方有顿悟感）</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-body">
+<div class="insight-card"><div class="insight-label">能量公式</div><div class="insight-text">你在「面对面、有即时反馈」的环境下，做「把模糊变具体」的事情时，最容易活过来。你的能量来源不是管事情，是造东西和被需要。</div></div>
+<p>一个重要的区分：<strong>你擅长做的事 ≠ 让你活过来的事。</strong></p><p>你很擅长项目管理——但你每次做完都觉得被掏空。你喜欢造产品——但你还没把它变成日常工作。这个gap不是小事，它是你接下来要设计的东西。</p>
+
+    </div>
+  </section>
+
+<div class="divider-dot"></div>
+
+  <section class="section">
+    <div class="section-number">05</div>
+    <h2 class="section-title">三个奥德赛计划</h2>
+    <div class="section-body">
+<p>现在来做最好玩的一步——设计三个完全不同、但都是你真心愿意走的五年版本。记住，这三个不是好/中/差三档，三个都是 A 计划。</p>
+</div>
+    <div class="odyssey-grid">
+      <div class="odyssey-card" data-plan="A" style="--plan-color: #C86A4A" onclick="toggleOdyssey(this)">
+        <div class="odyssey-tag">Plan A · 延续当下</div>
+        <h3 class="odyssey-title">产品管理者</h3>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">资源</span><span class="odyssey-eval-bar" style="--val: 80%;"></span><span class="odyssey-eval-val">80</span></div>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">喜欢</span><span class="odyssey-eval-bar" style="--val: 50%;"></span><span class="odyssey-eval-val">50</span></div>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">信心</span><span class="odyssey-eval-bar" style="--val: 70%;"></span><span class="odyssey-eval-val">70</span></div>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">对齐</span><span class="odyssey-eval-bar" style="--val: 45%;"></span><span class="odyssey-eval-val">45</span></div>
+        <div class="odyssey-card-hint">点击展开 ↓</div>
+      </div>
+      <div class="odyssey-card" data-plan="B" style="--plan-color: #5A8A62" onclick="toggleOdyssey(this)">
+        <div class="odyssey-tag">Plan B · 另一条路</div>
+        <h3 class="odyssey-title">独立产品人</h3>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">资源</span><span class="odyssey-eval-bar" style="--val: 40%;"></span><span class="odyssey-eval-val">40</span></div>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">喜欢</span><span class="odyssey-eval-bar" style="--val: 85%;"></span><span class="odyssey-eval-val">85</span></div>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">信心</span><span class="odyssey-eval-bar" style="--val: 45%;"></span><span class="odyssey-eval-val">45</span></div>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">对齐</span><span class="odyssey-eval-bar" style="--val: 90%;"></span><span class="odyssey-eval-val">90</span></div>
+        <div class="odyssey-card-hint">点击展开 ↓</div>
+      </div>
+      <div class="odyssey-card" data-plan="C" style="--plan-color: #4A7A9C" onclick="toggleOdyssey(this)">
+        <div class="odyssey-tag">Plan C · 无限可能</div>
+        <h3 class="odyssey-title">产品创作者 + 教育者</h3>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">资源</span><span class="odyssey-eval-bar" style="--val: 30%;"></span><span class="odyssey-eval-val">30</span></div>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">喜欢</span><span class="odyssey-eval-bar" style="--val: 90%;"></span><span class="odyssey-eval-val">90</span></div>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">信心</span><span class="odyssey-eval-bar" style="--val: 35%;"></span><span class="odyssey-eval-val">35</span></div>
+        <div class="odyssey-eval"><span class="odyssey-eval-label">对齐</span><span class="odyssey-eval-bar" style="--val: 95%;"></span><span class="odyssey-eval-val">95</span></div>
+        <div class="odyssey-card-hint">点击展开 ↓</div>
+      </div>
+    </div>
+    <div class="odyssey-detail-full" id="odyssey-panel">
+      <div class="odyssey-detail-inner" id="odyssey-panel-inner">
+      </div>
+    </div>
+    <script>var __odysseyPlans = {"A": {"tag": "Plan A · 延续当下", "title": "产品管理者", "color": "#C86A4A", "timeline": "<p><strong>第1年：</strong>在现有公司争取一个产品方向负责人的角色，开始从「管项目」转向「做产品」。</p><p><strong>第2-3年：</strong>积累产品方法论，带一个小团队做出一个有用户口碑的产品。</p><p><strong>第4-5年：</strong>成为某个垂直领域的产品负责人，开始思考自己的产品方向。</p>", "body": "留在现有公司，从项目管理转向产品方向。稳定收入 + 系统方法论积累。风险低，但成长曲线较缓。适合「先稳住再找方向」的阶段。", "questions": ["在现有公司有没有可能从项目管理转向产品方向？需要什么条件？", "你愿意用两年时间在一个安全的环境里积累产品能力吗？"]}, "B": {"tag": "Plan B · 另一条路", "title": "独立产品人", "color": "#5A8A62", "timeline": "<p><strong>第1年：</strong>利用业余时间做第一个小产品。不辞职，用晚上和周末验证。做到有 100 个真实用户。</p><p><strong>第2年：</strong>如果产品有正反馈，开始认真考虑全职做。加入一个创业团队或者自己做。</p><p><strong>第3-5年：</strong>成为一个独立产品人。有自己的产品，有自己的用户，靠产品养活自己。</p>", "body": "用业余时间验证产品想法，逐步过渡到全职独立。核心是「用最小成本试错」。收入不稳定但自由度高。适合「脑子里已经有一个想法在烧」的状态。", "questions": ["你脑子里有没有一个具体产品想法，已经想了很久但一直没做？", "如果明天就开始，你的第一个最小可行产品可以是什么？"]}, "C": {"tag": "Plan C · 无限可能", "title": "产品创作者 + 教育者", "color": "#4A7A9C", "timeline": "<p><strong>第1年：</strong>开始写产品相关的文章/播客。不辞职。目标是找到你的声音和受众。</p><p><strong>第2-3年：</strong>内容和产品双线并行。写东西帮你梳理思路，做产品帮你验证想法。</p><p><strong>第4-5年：</strong>成为产品领域的创作者——有自己的社群，教别人做产品，同时自己做产品。</p>", "body": "写作 + 做产品双线并行。内容帮你建立影响力，产品帮你验证想法。前期投入大、回报慢，但一旦飞轮转起来，天花板最高。适合「愿意用三年换一个事业」的人。", "questions": ["你有没有想过把你帮朋友做产品的那个下午，变成一种日常？", "你的声音是什么？你想教别人什么？"]}};</script>
+    <div class="section-body">
+<div class="insight-card"><div class="insight-label">执行路径</div>
+<p style="margin-bottom:8px;"><strong style="color:var(--accent);">反愿景：</strong>每天在会议室里度过 8 小时，下班后什么都不想动。35 岁回头看，发现自己只是换了一个更大的格子间。</p>
+<p style="margin-bottom:8px;"><strong style="color:#5A8A62;">愿  景：</strong>做出一个小产品，有人真的在用。每天起来有动力打开电脑。周末不是在赶 deadline，是在想「下一步怎么让它更好」。</p>
+<p style="margin-bottom:8px;"><strong>本季度核心问题：</strong>我脑子里的那个产品想法，真的有人需要吗？</p>
+<p style="margin-bottom:8px;"><strong>本月原型：</strong>用 4 个周末做出一个最简版本。找 10 个目标用户试用。记录他们的真实反应。</p>
+<p style="margin-bottom:8px;"><strong>每日习惯：</strong>每天花 15 分钟写下产品想法的三句话。不用多，三句话就好。</p>
+<p><strong>底线规则：</strong>三个月后如果完全没有正反馈（没人用、没人讨论、你自己也不想打开），重新评估方向。但注意——重新评估方向 ≠ 放弃做产品这件事。</p>
+</div>
+<p>我注意到一个有意思的事——你的版本二和版本三有一个共同的内核：<strong>造东西 + 帮别人</strong>。这不是巧合。你的指南针其实指向了同一个方向，只是你自己还没允许自己认真去想。</p><p>这不是三个选择之间的竞争。这是你人生主题在不同规模下的投影。不管你先走哪条路，最终你都在走向同一个方向。</p>
+
+    </div>
+  </section>
+
+<div class="divider"></div>
+
+  <section class="section">
+    <div class="section-number">06</div>
+    <h2 class="section-title">接下来 30 天</h2>
+    <div class="section-body">
+<p>从「不知道自己在干嘛」到「明天就能做的一件事」——你已经有方向了。下面是你的原型行动清单：</p>
+</div>
+    <div class="actions-group">
+      <div class="actions-group-title">谈  ·  TALK</div>
+      <div class="timeline">
+        <div class="timeline-item"><span class="timeline-check" data-idx="talk-0">✓</span><div class="timeline-text">找 2-3 个「已经在做独立产品的人」聊聊。不是去求职，是去听他们的故事。问他们：「你第一个产品是怎么开始的？」「最大的坑是什么？」「什么时候觉得'这条路是对的'？」</div></div>
+      </div>
+    </div>
+    <div class="actions-group">
+      <div class="actions-group-title">试  ·  TRY</div>
+      <div class="timeline">
+        <div class="timeline-item"><span class="timeline-check" data-idx="try-0">✓</span><div class="timeline-text">用 4 个周末做你脑子里那个产品的最小版本。不追求完美——丑没关系，能用就行。找 10 个人试用，记录他们的第一反应。</div></div>
+      </div>
+    </div>
+    <div class="actions-group">
+      <div class="actions-group-title">走  ·  GO</div>
+      <div class="timeline">
+        <div class="timeline-item"><span class="timeline-check" data-idx="step-0">✓</span><div class="timeline-text">今晚，花 15 分钟写下三句话：你想做的产品是什么？帮谁解决什么问题？为什么是你来做？三句话就够了。</div></div>
+      </div>
+    </div>
+    <div class="actions-group">
+      <div class="actions-group-title">醒  ·  WAKE</div>
+      <div class="timeline">
+        <div class="timeline-item"><span class="timeline-check" data-idx="habit-0">✓</span><div class="timeline-text">手机设 3 个随机提醒（每天不同时间），提醒内容：「此刻我在做什么？它是在让我走向我想要的生活，还是让我留在原地？」不用回答，注意到就好。</div></div>
+      </div>
+    </div>
+    <div class="section-body">
+
+    </div>
+  </section>
+
+
+  <div class="letter-wrap">
+    <div class="letter-date">2027年1月8日</div>
+    <div class="letter-greeting">亲爱的未来的你：</div>
+    <div class="letter-body"><p>亲爱的半年后的我：</p><p>写这封信的时候，是一个周三的晚上。你刚跟一个 AI 聊了快一个小时。你说你像跑步机——跑得很快但原地不动。那天晚上你做了一个决定：今晚写三句话。</p><p>我不知道你写了没有。我也不知道你做了那个产品没有。但我知道一件事：你愿意认真想这个问题，本身就说明你还在乎。</p><p>如果你已经开始做了——不管做得好不好——你已经比半年前的自己勇敢了太多。</p><p>如果你还没开始——也没关系。人生不是考试，没有过期。</p><p>但请你现在做一件事：回想一下那天晚上聊天时，你说到帮朋友做产品那个下午时你的语气。那个语气里的你，才是你。</p><p>去找他。</p></div>
+    <div class="letter-sign">—— 那个下午的你</div>
+  </div>
+
+<div class="divider"></div>
+
+  <section class="section">
+    <div class="section-number">07</div>
+    <h2 class="section-title">失败免疫</h2>
+    <div class="section-body">
+<p>你有三个版本可以试。你不需要选最好的那个——你只需要选一个先走。</p><p>走不通就换一个。这不是考试，没有不及格。</p><p>你今天做的最重要的事不是得到了三个计划。而是——你终于允许自己去想「我还可以活成另一种样子」。</p><p>那个可能性一直都在。你只是今天第一次认真地看了它一眼。</p><p>去写那三句话吧。今晚就好。</p>
+</div>
+    <div class="closing-quote">
+      <div class="closing-quote-line"></div>
+      <p class="closing-quote-text">「人生不是我们发现了什么，而是我们创造了什么。你不是在寻找一条已有的路——你在开辟一条只属于你的路。」</p>
+      <div class="closing-quote-author">—— — Bill Burnett & Dave Evans, Designing Your Life</div>
+    </div>
+    <div class="section-body">
+
+    </div>
+  </section>
+
+
+  <div class="divider-dot"></div>
+
+  <section class="appointment">
+    <p class="appointment-desc">
+      你刚刚在对话的最后，选择封存了一封写给未来自己的信。<br>
+      这封信里记录了你此刻的真实想法、你的犹豫、你的期待。
+    </p>
+    <div class="appointment-date">2026 年 08 月 08 日 · 星期六</div>
+    <p class="appointment-hint">
+      30 天后，这封信会自动送达。<br>
+      到时候你会收到提醒——打开它，看看一个月前的自己。
+    </p>
+  </section>
+
+
+  <div class="md-actions">
+    <button class="md-btn" onclick="__copyMd(this)">复制为 Markdown</button>
+    <button class="md-btn" onclick="__downloadMd()">下载 .md</button>
+  </div>
+
+
+  <footer class="footer">
+    <div class="footer-text">
+      Life Design Blueprint · 基于斯坦福 Life Design Lab 方法论<br>
+      Generated with care · 2026年7月8日
+    </div>
+  </footer>
+
+</div>
+<script type="text/markdown" id="blueprint-md">
+# 在不确定中，设计属于自己的人生
+
+### 一份关于选择、意义与不确定性的私人蓝图
+
+> LIFE DESIGN BLUEPRINT · Nº 001 · 2026年7月8日 · 朋友
+
+---
+
+## 01 · 你在这里
+你走进来的时候说了一句话：「我觉得工作还行但很迷茫」。这句话里藏着两个声音——一个在说「我能做」，另一个在说「但做了又怎样」。
+
+下面四个维度的打分，帮我们把这个模糊的感觉变成了可以看清的画面。
+
+|  维度  | 分数 | 一句话 |
+|:------:|:----:|:------|
+| 健康 | 6/10 | 身体还行，但最近睡眠不太好。你提到了好几次'累'，但没有说具体哪里累——这种模糊的疲惫感往往不是身体的，是心理的。 |
+| 工作 | 5/10 | 你说工作'不差'。注意你用的词——不是'好'，是'不差'。'不差'是一个防御性的评价，说明你对工作没有负面情绪，但也找不到正面情绪。 |
+| 娱乐 | 3/10 | 这个分数说明你的生活已经被'有用的事'填满了。纯粹为了快乐做的事，你想了很久才想出'上个月打游戏'。这不是时间问题，是你已经不允许自己'没用'了。 |
+| 爱 | 7/10 | 这是你最高的分数。你有人可以打给，有连接感。这个维度是你的锚——不管工作怎么变，这个底座是稳的。 |
+
+把四个分数放在一起看，有一个很清晰的模式：你的 **工作和娱乐严重失衡**，而且失衡的方向很值得注意——你不是因为工作太忙没时间玩，而是 *你已经忘了怎么玩*。
+
+你的爱（7分）和健康（6分）还在支撑着你。但工作和娱乐之间的落差，指向的不是「需要休息」，而是「需要找到让你活过来的事」。
+
+---
+
+> **"我像个跑步机——跑得很快，但原地不动。"**
+>
+> — 你 · Phase 1 描述工作感受时
+
+---
+
+## 02 · 重构问题
+你说你迷茫。但聊了这么多之后，我觉得你其实不迷茫——你知道你能做什么，你缺的是「做这些跟我在乎的东西有什么关系」。
+
+让我们把你最初以为的问题拆开看看：
+
+```
+你以为的     →   我不知道自己该做什么，没有方向。
+重力问题     →   你所在的行业确实有年龄焦虑和天花板——这是现实，不是你个人能解决的。接受它。
+真  问 题 ★   →   你不是不知道该做什么。你知道你能做什么。你缺的是——做这些事跟我真正在乎的东西有什么关系？
+错误前提     →   「先想清楚再行动」——这个假设让你一直在想，一直在等，一直在原地转。
+```
+
+你不是在跑错方向。你是站在起跑线上，因为不确定终点在哪所以不敢跑。
+
+但设计思维告诉你：**不用知道终点。先跑起来，边跑边调整方向。**
+
+---
+
+## 03 · 你的内在罗盘
+我们聊了你的工作观和人生观。有意思的是，你描述了两套完全不同的引擎：
+
+**工作观**  →  工作是证明自己的方式。让家人觉得我有出息，给自己安全感。赚钱，稳定，往上走。——这是你现在的引擎，它让你跑得快。但你说了，跑到头也不想跑了。
+
+**人生观**  →  做出一个东西，真的帮到别人。哪怕只是一小群人。——你提到这个的时候用了「挺值的」。这个词的重量跟前面描述工作时用的「不差」完全不同。
+
+你发现了吗？你白天在跑第一台引擎（证明自己），但晚上睡前想的是第二台（帮到别人）。
+
+这两台引擎在你脑子里打架。你现在的痛苦不是来自「不知道该做什么」，而是来自 **两个自己之间的一致性裂缝**——你在过一个人的人生，心里想的是另一个人的。
+
+你的指南针正北方向其实很清楚：*造东西，帮到人*。偏离的方向是：你目前在为「安全感」工作，而不是为「意义感」工作。
+
+---
+
+## 04 · 能量地图
+我让你回忆一个完全投入、忘了时间的时刻。你几乎立刻就想到了——上周末帮朋友做小程序的那个下午。
+
+**心流时刻**
+- 帮朋友做产品原型——面对面协作，用 iPad 画图，最爽的是对方说「对对对就是这个」的瞬间
+- 深夜一个人写文章——不是工作汇报，是写自己的想法。写完会有一种「被自己说服了」的感觉
+- 给朋友讲一个复杂概念，看到对方眼睛亮了的那一刻
+
+**回血活动**
+- 和朋友吃一顿很长的饭，聊的不是工作
+- 散步时听播客，偶尔停下来记个笔记
+- 周末早上不赶时间地泡一杯咖啡，什么都不做
+
+**擅长但耗能**
+- 写周报和项目管理文档——做得好但每次做完都像被抽干
+- 开没有结论的会——时间花了但什么都没推进
+
+**偏  向**
+- 造东西（把模糊的想法变成具体的产品/内容）
+- 帮人看清问题（把复杂的事说简单，让对方有顿悟感）
+
+**能量公式**  →  你在「面对面、有即时反馈」的环境下，做「把模糊变具体」的事情时，最容易活过来。你的能量来源不是管事情，是造东西和被需要。
+
+一个重要的区分：**你擅长做的事 ≠ 让你活过来的事。**
+
+你很擅长项目管理——但你每次做完都觉得被掏空。你喜欢造产品——但你还没把它变成日常工作。这个gap不是小事，它是你接下来要设计的东西。
+
+---
+
+## 05 · 三个奥德赛计划
+现在来做最好玩的一步——设计三个完全不同、但都是你真心愿意走的五年版本。记住，这三个不是好/中/差三档，三个都是 A 计划。
+
+### Plan A · 延续当下 — 产品管理者
+
+留在现有公司，从项目管理转向产品方向。稳定收入 + 系统方法论积累。风险低，但成长曲线较缓。适合「先稳住再找方向」的阶段。
+
+**时间线**
+
+**第1年：**在现有公司争取一个产品方向负责人的角色，开始从「管项目」转向「做产品」。
+
+**第2-3年：**积累产品方法论，带一个小团队做出一个有用户口碑的产品。
+
+**第4-5年：**成为某个垂直领域的产品负责人，开始思考自己的产品方向。
+
+**想问自己**
+
+- *在现有公司有没有可能从项目管理转向产品方向？需要什么条件？*
+- *你愿意用两年时间在一个安全的环境里积累产品能力吗？*
+
+| 资源 | 喜欢程度 | 信心 | 与人生观对齐 |
+|:----:|:--------:|:----:|:-----------:|
+| 80 | 50 | 70 | 45 |
+
+### Plan B · 另一条路 — 独立产品人
+
+用业余时间验证产品想法，逐步过渡到全职独立。核心是「用最小成本试错」。收入不稳定但自由度高。适合「脑子里已经有一个想法在烧」的状态。
+
+**时间线**
+
+**第1年：**利用业余时间做第一个小产品。不辞职，用晚上和周末验证。做到有 100 个真实用户。
+
+**第2年：**如果产品有正反馈，开始认真考虑全职做。加入一个创业团队或者自己做。
+
+**第3-5年：**成为一个独立产品人。有自己的产品，有自己的用户，靠产品养活自己。
+
+**想问自己**
+
+- *你脑子里有没有一个具体产品想法，已经想了很久但一直没做？*
+- *如果明天就开始，你的第一个最小可行产品可以是什么？*
+
+| 资源 | 喜欢程度 | 信心 | 与人生观对齐 |
+|:----:|:--------:|:----:|:-----------:|
+| 40 | 85 | 45 | 90 |
+
+### Plan C · 无限可能 — 产品创作者 + 教育者
+
+写作 + 做产品双线并行。内容帮你建立影响力，产品帮你验证想法。前期投入大、回报慢，但一旦飞轮转起来，天花板最高。适合「愿意用三年换一个事业」的人。
+
+**时间线**
+
+**第1年：**开始写产品相关的文章/播客。不辞职。目标是找到你的声音和受众。
+
+**第2-3年：**内容和产品双线并行。写东西帮你梳理思路，做产品帮你验证想法。
+
+**第4-5年：**成为产品领域的创作者——有自己的社群，教别人做产品，同时自己做产品。
+
+**想问自己**
+
+- *你有没有想过把你帮朋友做产品的那个下午，变成一种日常？*
+- *你的声音是什么？你想教别人什么？*
+
+| 资源 | 喜欢程度 | 信心 | 与人生观对齐 |
+|:----:|:--------:|:----:|:-----------:|
+| 30 | 90 | 35 | 95 |
+
+### 执行路径
+
+**反愿景**  →  每天在会议室里度过 8 小时，下班后什么都不想动。35 岁回头看，发现自己只是换了一个更大的格子间。
+
+**愿景**  →  做出一个小产品，有人真的在用。每天起来有动力打开电脑。周末不是在赶 deadline，是在想「下一步怎么让它更好」。
+
+**本季度核心问题**  →  我脑子里的那个产品想法，真的有人需要吗？
+
+**本月原型**  →  用 4 个周末做出一个最简版本。找 10 个目标用户试用。记录他们的真实反应。
+
+**每日习惯**  →  每天花 15 分钟写下产品想法的三句话。不用多，三句话就好。
+
+**底线规则**  →  三个月后如果完全没有正反馈（没人用、没人讨论、你自己也不想打开），重新评估方向。但注意——重新评估方向 ≠ 放弃做产品这件事。
+
+我注意到一个有意思的事——你的版本二和版本三有一个共同的内核：**造东西 + 帮别人**。这不是巧合。你的指南针其实指向了同一个方向，只是你自己还没允许自己认真去想。
+
+这不是三个选择之间的竞争。这是你人生主题在不同规模下的投影。不管你先走哪条路，最终你都在走向同一个方向。
+
+---
+
+## 06 · 接下来 30 天
+从「不知道自己在干嘛」到「明天就能做的一件事」——你已经有方向了。下面是你的原型行动清单：
+
+**谈  ·  TALK**
+
+- [ ] 找 2-3 个「已经在做独立产品的人」聊聊。不是去求职，是去听他们的故事。问他们：「你第一个产品是怎么开始的？」「最大的坑是什么？」「什么时候觉得'这条路是对的'？」
+
+**试  ·  TRY**
+
+- [ ] 用 4 个周末做你脑子里那个产品的最小版本。不追求完美——丑没关系，能用就行。找 10 个人试用，记录他们的第一反应。
+
+**走  ·  GO**
+
+- [ ] 今晚，花 15 分钟写下三句话：你想做的产品是什么？帮谁解决什么问题？为什么是你来做？三句话就够了。
+
+**醒  ·  WAKE**
+
+- [ ] 手机设 3 个随机提醒（每天不同时间），提醒内容：「此刻我在做什么？它是在让我走向我想要的生活，还是让我留在原地？」不用回答，注意到就好。
+
+---
+
+## 一封写给未来的信
+
+*2027年1月8日*
+
+亲爱的未来的你：
+
+亲爱的半年后的我：
+
+写这封信的时候，是一个周三的晚上。你刚跟一个 AI 聊了快一个小时。你说你像跑步机——跑得很快但原地不动。那天晚上你做了一个决定：今晚写三句话。
+
+我不知道你写了没有。我也不知道你做了那个产品没有。但我知道一件事：你愿意认真想这个问题，本身就说明你还在乎。
+
+如果你已经开始做了——不管做得好不好——你已经比半年前的自己勇敢了太多。
+
+如果你还没开始——也没关系。人生不是考试，没有过期。
+
+但请你现在做一件事：回想一下那天晚上聊天时，你说到帮朋友做产品那个下午时你的语气。那个语气里的你，才是你。
+
+去找他。
+
+—— 那个下午的你
+
+---
+
+## 07 · 失败免疫
+你有三个版本可以试。你不需要选最好的那个——你只需要选一个先走。
+
+走不通就换一个。这不是考试，没有不及格。
+
+你今天做的最重要的事不是得到了三个计划。而是——你终于允许自己去想「我还可以活成另一种样子」。
+
+那个可能性一直都在。你只是今天第一次认真地看了它一眼。
+
+去写那三句话吧。今晚就好。
+
+> **「人生不是我们发现了什么，而是我们创造了什么。你不是在寻找一条已有的路——你在开辟一条只属于你的路。」**
+>
+> — — Bill Burnett & Dave Evans, Designing Your Life
+
+---
+
+## ✉ 一封来自 30 天前的信
+
+**将在 2026 年 08 月 08 日 · 星期六 到达。**
+
+那不是我写的，是那天下午的你写的。
+
+到时候见。
+
+---
+
+*Life Design Blueprint · Based on Stanford d.school Life Design Lab*
+
+</script>
+
+<script>
+function __getMd() {
+  var el = document.getElementById('blueprint-md');
+  return el ? el.textContent.replace(/^\s+/, '') : '';
+}
+function __copyMd(btn) {
+  var md = __getMd();
+  if (!md) { btn.textContent = '(无 Markdown 内容)'; return; }
+  navigator.clipboard.writeText(md).then(function() {
+    var orig = btn.textContent;
+    btn.textContent = '✓ 已复制';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+  }).catch(function() {
+    btn.textContent = '复制失败';
+    setTimeout(function(){ btn.textContent = '复制为 Markdown'; }, 2000);
+  });
+}
+function __downloadMd() {
+  var md = __getMd();
+  if (!md) return;
+  var name = document.title.replace(/\s*·.*$/, '').replace(/[\/\\:*?"<>|]/g, '_') + '.md';
+  var blob = new Blob([md], {type: 'text/markdown;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.classList && e.target.classList.contains('timeline-check')) {
+    e.target.classList.toggle('checked');
+  }
+});
+function toggleOdyssey(card) {
+  var plan = card.getAttribute('data-plan');
+  var panel = document.getElementById('odyssey-panel');
+  var inner = document.getElementById('odyssey-panel-inner');
+  var isActive = card.classList.contains('active');
+
+  // 清除所有卡片的 active 状态
+  var cards = document.querySelectorAll('.odyssey-card');
+  for (var i = 0; i < cards.length; i++) { cards[i].classList.remove('active'); }
+
+  if (isActive) {
+    // 点击已激活的卡片 → 关闭
+    panel.classList.remove('active');
+    panel.style.borderTopColor = '';
+    return;
+  }
+
+  // 激活当前卡片
+  card.classList.add('active');
+  var data = (typeof __odysseyPlans !== 'undefined') ? __odysseyPlans[plan] : null;
+  if (!data) return;
+
+  // 设置面板边框颜色
+  panel.style.borderTopColor = data.color;
+
+  // 构建面板内容
+  var html = '';
+  // 左栏：标题 + 描述 + 时间线
+  html += '<div class="odyssey-timeline-col">';
+  if (data.title) {
+    html += '<h3 style="font-family:var(--serif);font-size:1.1rem;margin:0 0 12px;color:var(--plan-color,' + data.color + ')">' + data.title + '</h3>';
+  }
+  if (data.body) {
+    html += '<div style="font-size:0.88rem;line-height:1.8;color:var(--stone);margin-bottom:16px">' + data.body + '</div>';
+  }
+  if (data.timeline) {
+    html += '<div class="odyssey-detail-label">时间线 · TIMELINE</div>';
+    html += '<div class="odyssey-timeline">' + data.timeline + '</div>';
+  }
+  html += '</div>';
+  // 右栏：想问自己
+  html += '<div class="odyssey-questions-col">';
+  html += '<div class="odyssey-detail-label">想问自己 · QUESTIONS</div>';
+  if (data.questions && data.questions.length) {
+    html += '<ul class="odyssey-detail-questions" style="--plan-color:' + data.color + '">';
+    for (var j = 0; j < data.questions.length; j++) {
+      var q = data.questions[j] || '';
+      // 转义 HTML 特殊字符
+      q = q.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      html += '<li>' + q + '</li>';
+    }
+    html += '</ul>';
+  }
+  html += '</div>';
+  inner.innerHTML = html;
+
+  // 展开面板
+  panel.classList.add('active');
+
+  // 平滑滚动到面板
+  setTimeout(function() {
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
+</script>
+
+</body>
+</html>

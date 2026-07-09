@@ -72,6 +72,19 @@ cp -r life-designer ~/.qoderwork/skills/life-designer
 
 ---
 
+## 预览
+
+👉 **[点击查看 Demo 报告](https://jackychen-12.github.io/life-designer/)** — 完整的人生设计蓝图 HTML 报告效果
+
+或者本地预览：
+
+```bash
+python3 scripts/report_generator.py --demo
+open output/demo-report.html
+```
+
+---
+
 ## 你会得到什么
 
 对话结束后，AI 会生成一份精美的 HTML 报告。双击打开，包含：
