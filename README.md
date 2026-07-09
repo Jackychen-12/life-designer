@@ -74,7 +74,7 @@ cp -r life-designer ~/.qoderwork/skills/life-designer
 
 ## 你会得到什么
 
-对话结束后，AI 会生成一份 HTML 文件。双击打开，长这样：
+对话结束后，AI 会生成一份精美的 HTML 报告。双击打开，包含：
 
 ```
 ┌──────────────────────────────────────────────┐
@@ -83,6 +83,10 @@ cp -r life-designer ~/.qoderwork/skills/life-designer
 │                                              │
 │  01  你在这里                                │
 │      健康 7/10  工作 5/10  娱乐 3/10  爱 7/10 │
+│      + SVG 雷达图（自动生成）                 │
+│                                              │
+│  ✦  对话金句卡                               │
+│     「我像个跑步机——跑得很快但原地不动」      │
 │                                              │
 │  02  真问题                                  │
 │      你以为的 → 重力问题 → 真问题 → 错误前提  │
@@ -99,12 +103,15 @@ cp -r life-designer ~/.qoderwork/skills/life-designer
 │  06  原型行动清单                             │
 │      谈 / 试 / 走 / 醒                       │
 │                                              │
+│  ✉  给 6 个月后自己的一封信                   │
+│                                              │
 │  07  失败免疫                                │
 │      「你有三个版本可以试。走不通就换。」      │
+│      + 哲学引言                              │
 └──────────────────────────────────────────────┘
 ```
 
-暖色调、Serif 字体、极简留白。不是冰冷的报告，更像一封写给你的信。
+暖色调、Serif 字体、极简留白。三个惊喜元素：对话金句卡、SVG 雷达图、给未来的信。
 
 ---
 
@@ -125,29 +132,42 @@ cp -r life-designer ~/.qoderwork/skills/life-designer
 
 ```
 life-designer/
-├── SKILL.md                    # 核心文件：786 行 Skill 定义
-├── README.md                   # 你正在看的这个
-├── LICENSE                     # MIT
+├── SKILL.md                        # 核心文件：Skill 定义（800+ 行）
+├── README.md                       # 你正在看的这个
+├── LICENSE                         # MIT
 ├── assets/
-│   └── report-template.html    # HTML 报告模板
+│   └── report-template-v1.html     # v1 占位符模板（已归档，v2 由脚本动态生成）
 ├── scripts/
-│   ├── report_generator.py     # JSON → HTML 报告生成器
-│   └── dialogue_tracker.py     # 对话阶段追踪器
-└── references/
-    └── talk_examples.md        # 完整对话示范（从头到尾）
+│   ├── report_generator.py         # v2 报告生成器：富文本 JSON → 精美 HTML
+│   └── dialogue_tracker.py         # 对话阶段追踪器
+├── references/
+│   └── talk_examples.md            # 完整对话示范（从头到尾）
+└── output/
+    └── demo-report.html            # 运行 --demo 生成的示例报告
 ```
 
 ---
 
 ## 脚本工具
 
-### 报告生成器
+### 报告生成器（v2）
 
-对话结束后，AI 把对话内容整理成 JSON，这个脚本帮你填入 HTML 模板：
+对话结束后，AI 把对话内容整理为富文本 JSON，脚本自动渲染成精美 HTML：
 
 ```bash
+# 从 JSON 生成报告
 python3 scripts/report_generator.py --input conversation.json
+
+# 生成示范报告（看看效果）
+python3 scripts/report_generator.py --demo
 ```
+
+**v2 架构的核心变化：** 不再是「填占位符」，而是「AI 写富文本，脚本做排版」。每个章节都有一个 `narrative` 字段——AI 在这里自由写作深度叙事，不被格子限制。
+
+新增惊喜元素：
+- **对话金句卡** — 从对话中选出最有力的一句话，渲染成精美卡片
+- **SVG 雷达图** — 根据四维度分数自动生成可视化
+- **给未来的信** — 用用户视角写给 6 个月后的自己
 
 ### 对话追踪器
 
