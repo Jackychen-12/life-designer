@@ -74,7 +74,13 @@ cp -r life-designer ~/.qoderwork/skills/life-designer
 
 ## 预览
 
-👉 **[点击查看 Demo 报告](https://jackychen-12.github.io/life-designer/)** — 完整的人生设计蓝图 HTML 报告效果
+<p align="center">
+  <a href="https://jackychen-12.github.io/life-designer/">
+    <img src="docs/preview.png" alt="Life Design Blueprint Demo" width="800">
+  </a>
+</p>
+
+👉 **[点击查看完整在线 Demo](https://jackychen-12.github.io/life-designer/)**
 
 或者本地预览：
 
