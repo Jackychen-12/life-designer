@@ -1700,62 +1700,229 @@ def seal_capsule(data: dict, output_dir: str) -> dict:
     return {"capsule": capsule, "path": capsule_path}
 
 
+def _ics_dt(d: str, hour: int = 9) -> str:
+    """把 '2026-08-08' 转成 ICS 格式 '20260808T090000'（本地时间）"""
+    return d.replace('-', '') + f'T{hour:02d}0000'
+
+
+def generate_capsule_reminders(capsule: dict, output_dir: str) -> dict:
+    """
+    生成时间胶囊的提醒素材（自包含，无外部依赖）：
+      1. .ics 日历文件 — 用户双击即可导入 Google/Apple/Outlook 日历，
+         30天和90天各一个事件，事件描述里包含完整的信件内容。
+      2. capsule-letter.html — 一个独立网页，打开后展示两封信，
+         用 JS 判断当前日期：未到日期的信显示为「封印中」状态。
+
+    返回 {"ics_path": "...", "letter_path": "...", "ok": True}
+    """
+    capsule_dir = os.path.join(output_dir, 'capsules')
+    cid = capsule['capsule_id']
+    d30 = capsule['trigger_at_d30']
+    d90 = capsule['trigger_at_d90']
+    user = capsule.get('user_name', '朋友')
+    quote = capsule.get('quote', '')
+    metaphor = capsule.get('user_signature_metaphor', '')
+    contradiction = capsule.get('contradiction', '')
+    avoided = capsule.get('avoided_topic', '')
+    prototype = capsule.get('chosen_prototype', '')
+    sealed = capsule.get('sealed_at', '')
+
+    # ── 信件内容 ──
+    letter_30 = (
+        f"「{quote}」\n\n"
+        f"你还记得那个下午吗？你终于坐下来，认真地问自己：我到底想要什么样的生活？\n\n"
+        f"那天你说了很多真话。你说你像{metaphor or '一个一直在转的陀螺'}。"
+        f"你说你嘴上想要的是稳定，但你兴奋的全是另一件事。"
+        f"那天你做了一个决定——{prototype or '先走一步再说'}。\n\n"
+        f"我不知道这 30 天你做了什么。但我知道一件事：你愿意认真想这个问题，本身就说明你还在乎。\n\n"
+        f"有一个话题你当时绕开了——{avoided or '那个你还没准备好面对的事'}。"
+        f"现在呢？准备好了吗？不用急。什么时候准备好了，什么时候再回来。\n\n"
+        f"—— {sealed} 那个下午的你"
+    )
+    letter_90 = (
+        f"「{quote}」\n\n"
+        f"三个月了。\n\n"
+        f"我不打算问你做得怎么样。那不重要。"
+        f"重要的是——你还记得那个下午吗？你坐在那里，第一次认真地给自己设计了三种人生。\n\n"
+        f"你当时发现了一个矛盾：{contradiction or '你嘴上说的和你身体反应的，指向两个不同的方向'}。"
+        f"三个月过去了，这个矛盾还在吗？还是你已经走出了一个版本？\n\n"
+        f"不管答案是什么——走不通就换一个。这不是考试，没有不及格。\n\n"
+        f"去重新打开你的蓝图看看吧。看看那三个奥德赛计划，哪个让你心跳加速了。\n\n"
+        f"—— {sealed} 那个下午的你"
+    )
+
+    # ── 1. ICS 日历文件 ──
+    ics_path = os.path.join(capsule_dir, f'{cid}-reminders.ics')
+    now_ics = datetime.now().strftime('%Y%m%dT%H%M%S')
+    events = []
+    for phase, when, title, body in [
+        ("30天", d30, f"💌 来自 {sealed} 的你 · 一封信", letter_30),
+        ("90天", d90, f"💌 来自 {sealed} 的你 · 三个月后的信", letter_90),
+    ]:
+        escaped = body.replace('\\', '\\\\').replace('\n', '\\n').replace(';', '\\;').replace(',', '\\,')
+        events.append(
+            f"BEGIN:VEVENT\r\n"
+            f"DTSTART:{_ics_dt(when)}\r\n"
+            f"DTEND:{_ics_dt(when, 10)}\r\n"
+            f"SUMMARY:{title}\r\n"
+            f"DESCRIPTION:{escaped}\r\n"
+            f"UID:{cid}-{phase}@life-designer\r\n"
+            f"DTSTAMP:{now_ics}\r\n"
+            f"BEGIN:VALARM\r\nTRIGGER:-PT0M\r\nACTION:DISPLAY\r\n"
+            f"DESCRIPTION:打开你的时间胶囊\r\nEND:VALARM\r\n"
+            f"END:VEVENT\r\n"
+        )
+    ics_content = (
+        "BEGIN:VCALENDAR\r\n"
+        "VERSION:2.0\r\n"
+        "PRODID:-//Life Designer//Capsule//CN\r\n"
+        "CALSCALE:GREGORIAN\r\n"
+        "METHOD:PUBLISH\r\n"
+        + "".join(events)
+        + "END:VCALENDAR\r\n"
+    )
+    with open(ics_path, 'w', encoding='utf-8') as f:
+        f.write(ics_content)
+
+    # ── 2. 独立信件 HTML ──
+    letter_path = os.path.join(capsule_dir, f'{cid}-letter.html')
+    letter_html = f'''<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>时间胶囊 · {cid}</title>
+<style>
+  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+  body {{
+    font-family: 'PingFang SC', 'Noto Sans SC', sans-serif;
+    background: #FAF8F5; color: #1A1A18;
+    padding: 40px 20px; line-height: 1.8;
+  }}
+  .container {{ max-width: 680px; margin: 0 auto; }}
+  .header {{
+    text-align: center; margin-bottom: 60px; padding: 40px 0;
+    border-bottom: 1px solid #E8E4DF;
+  }}
+  .header h1 {{
+    font-size: 28px; font-weight: 400; color: #C86A4A;
+    letter-spacing: 0.1em;
+  }}
+  .header p {{ font-size: 14px; color: #A9A49C; margin-top: 12px; }}
+  .letter {{
+    background: white; border-radius: 12px; padding: 48px;
+    margin-bottom: 40px; box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+    position: relative; overflow: hidden;
+  }}
+  .letter.locked {{
+    filter: blur(0px); opacity: 0.5;
+  }}
+  .letter .badge {{
+    display: inline-block; font-size: 12px; padding: 4px 12px;
+    border-radius: 20px; margin-bottom: 20px; letter-spacing: 0.1em;
+  }}
+  .letter .badge.open {{ background: #5A8A62; color: white; }}
+  .letter .badge.locked {{ background: #E8E4DF; color: #A9A49C; }}
+  .letter .date {{
+    font-size: 14px; color: #A9A49C; margin-bottom: 24px;
+  }}
+  .letter .body {{
+    font-size: 18px; line-height: 2; white-space: pre-line;
+  }}
+  .letter .lock-overlay {{
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(250,248,245,0.85);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 16px; color: #A9A49C;
+  }}
+  .letter .lock-overlay .icon {{ font-size: 48px; margin-bottom: 16px; }}
+  .footer {{
+    text-align: center; font-size: 13px; color: #A9A49C;
+    padding: 40px 0; border-top: 1px solid #E8E4DF;
+  }}
+  .hint {{
+    background: #F5F0EB; border-radius: 8px; padding: 20px 24px;
+    font-size: 14px; color: #6B665E; margin-bottom: 40px;
+    line-height: 1.8;
+  }}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>✉ 时间胶囊</h1>
+    <p>{cid} · 封存于 {sealed}</p>
+  </div>
+
+  <div class="hint">
+    💡 <strong>建议：</strong>双击 <code>{cid}-reminders.ics</code> 文件，
+    导入你的日历（Google / Apple / Outlook 都行）。
+    到时间了日历会提醒你回来打开这封信。
+  </div>
+
+  <div class="letter" id="letter-30">
+    <span class="badge" id="badge-30"></span>
+    <div class="date">到达日期：{d30}</div>
+    <div class="body">{letter_30}</div>
+  </div>
+
+  <div class="letter" id="letter-90">
+    <span class="badge" id="badge-90"></span>
+    <div class="date">到达日期：{d90}</div>
+    <div class="body">{letter_90}</div>
+  </div>
+
+  <div class="footer">
+    Life Designer · Based on Stanford d.school Life Design Lab
+  </div>
+</div>
+
+<script>
+  const now = new Date();
+  const d30 = new Date('{d30}T00:00:00');
+  const d90 = new Date('{d90}T00:00:00');
+
+  function setup(id, date) {{
+    const letter = document.getElementById('letter-' + id);
+    const badge = document.getElementById('badge-' + id);
+    if (now >= date) {{
+      badge.className = 'badge open';
+      badge.textContent = '已到达';
+    }} else {{
+      letter.classList.add('locked');
+      badge.className = 'badge locked';
+      const days = Math.ceil((date - now) / 86400000);
+      badge.textContent = '封印中 · ' + days + ' 天后解锁';
+      const overlay = document.createElement('div');
+      overlay.className = 'lock-overlay';
+      overlay.innerHTML = '<div class="icon">🔒</div>' +
+        '<div>这封信还在路上<br>' + days + ' 天后自动解锁</div>';
+      letter.appendChild(overlay);
+    }}
+  }}
+  setup('30', d30);
+  setup('90', d90);
+</script>
+</body>
+</html>'''
+    with open(letter_path, 'w', encoding='utf-8') as f:
+        f.write(letter_html)
+
+    return {
+        "ics_path": ics_path,
+        "letter_path": letter_path,
+        "ok": True,
+        "output": f"日历文件 + 信件网页已生成",
+    }
+
+
 def schedule_letters(capsule: dict, dry_run: bool = False) -> list:
     """
-    调用平台 schedule-creator，为 30 天 / 90 天两次回信下调度。
-
-    关键设计：capsule 全量字段以 JSON 字符串塞进 query 参数里，
-    即便 30 天后 skill 目录被清空，也能从调度 payload 里恢复。
-
-    返回一个列表，每项 {"phase": "d30", "cmd": [...], "ok": bool, "output": "..."}。
-    dry_run=True 时只打印命令、不真的调用。
+    [已弃用] 原 schedule-creator 方案，保留兼容但不再作为主路径。
+    新代码请使用 generate_capsule_reminders()。
     """
-    results = []
-    payload_min = {
-        "cid": capsule["capsule_id"],
-        "u": capsule.get("user_name", ""),
-        "q": capsule.get("quote", ""),
-        "a": capsule.get("avoided_topic", ""),
-        "c": capsule.get("contradiction", ""),
-        "p": capsule.get("chosen_prototype", ""),
-        "m": capsule.get("user_signature_metaphor", ""),
-        "s": capsule.get("sealed_at", ""),
-    }
-    payload_str = json.dumps(payload_min, ensure_ascii=False, separators=(',', ':'))
-
-    for phase, when_days, when_desc in [("d30", 30, "30 天后"), ("d90", 90, "90 天后")]:
-        query = (
-            f"[life-designer 时间胶囊回信] phase={phase} "
-            f"capsule_id={capsule['capsule_id']} payload={payload_str}"
-        )
-        cmd = [
-            "schedule-creator", "add",
-            "--when", f"{when_days} days later",
-            "--title", f"Life Designer · {when_desc}的一封信",
-            "--query", query,
-        ]
-        if dry_run:
-            results.append({"phase": phase, "cmd": cmd, "ok": True, "output": "(dry-run)"})
-            continue
-        try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-            results.append({
-                "phase": phase,
-                "cmd": cmd,
-                "ok": proc.returncode == 0,
-                "output": (proc.stdout or '') + (proc.stderr or ''),
-            })
-        except FileNotFoundError:
-            # 沙箱里没有 schedule-creator 可执行文件属正常，返回一个明确标记
-            results.append({
-                "phase": phase,
-                "cmd": cmd,
-                "ok": False,
-                "output": "schedule-creator not found in PATH (由主 agent 代为下调度)",
-            })
-        except Exception as e:
-            results.append({"phase": phase, "cmd": cmd, "ok": False, "output": str(e)})
-    return results
+    return []
 
 
 def generate_demo_data():
@@ -2015,28 +2182,11 @@ JSON 结构（富文本区块，不再是原子占位符）：
             print(f'   30 天触发：{capsule["trigger_at_d30"]}')
             print(f'   90 天触发：{capsule["trigger_at_d90"]}')
 
-        results = schedule_letters(capsule, dry_run=args.dry_run_schedule)
-        for r in results:
-            mark = '✅' if r['ok'] else '⚠️'
-            if not args.quiet:
-                print(f'{mark} 调度 {r["phase"]}：{r["output"].strip()[:120]}')
-
-        # 关键兜底：如果 schedule-creator CLI 不在本机 PATH，
-        # 说明当前是在 skill 内直接跑脚本、平台调度需要主 agent 代下。
-        # 把待下调度的完整 query 写到 sidecar 文件，让上层 agent 读取后调用。
-        if any(not r['ok'] for r in results):
-            sidecar = os.path.join(output_dir, 'capsules',
-                                   f'{capsule["capsule_id"]}.pending_schedules.json')
-            with open(sidecar, 'w', encoding='utf-8') as f:
-                json.dump({
-                    "capsule_id": capsule["capsule_id"],
-                    "note": "schedule-creator 未在脚本环境中可用，请由主 agent 读取本文件并调用 schedule-creator skill 下调度。",
-                    "schedules": [
-                        {"phase": r["phase"], "cmd": r["cmd"]} for r in results if not r['ok']
-                    ],
-                }, f, ensure_ascii=False, indent=2)
-            if not args.quiet:
-                print(f'📎 已写出 pending_schedules 兜底文件：{sidecar}')
+        result = generate_capsule_reminders(capsule, output_dir)
+        if not args.quiet:
+            print(f'📅 日历提醒文件：{result["ics_path"]}')
+            print(f'💌 信件网页：{result["letter_path"]}')
+            print(f'   → 双击 .ics 文件导入日历，到时间会提醒你回来读信')
     elif not args.quiet and not args.demo and not capsule_confirmed:
         print('⏭️  时间胶囊未封存（用户未确认，跳过）')
 

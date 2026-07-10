@@ -17,7 +17,7 @@ version: 3.0.0
 skill 被拉起时**先看** query 里有没有 `[life-designer 时间胶囊回信]` 标记：
 
 **A. 命中「时间胶囊回信」标记（含 `phase=d30` 或 `phase=d90`）**
-→ **走回信分支**，不要进入四阶段对话，也不要打招呼。步骤：
+→ **走回信分支**。这通常发生在用户主动回来想读/回那封信时。步骤：
 
 1. 从 query 里解析出 `capsule_id` 和 `payload=<JSON 字符串>`。
 2. 优先从 `payload` 里读取胶囊字段（`cid/u/q/a/c/p/m/s`）；如果 `payload` 缺失，再尝试读本地文件 `output/capsules/<capsule_id>.json`。
@@ -792,18 +792,19 @@ Phase 6（失败免疫）     → 🌡️ 安心释然    → 用户感受：「
 1. 对话结束后，根据对话内容整理 JSON（按 6.3 的 schema）
 2. 保存为 output/report_data.json
 3. 运行：python3 scripts/report_generator.py --input output/report_data.json
-4. 脚本自动做四件事：
+4. 脚本自动做五件事：
    ① 渲染 HTML：output/人生设计蓝图_用户名_日期.html（禅意基调 + 内嵌 Markdown 双载体）
    ② 生成 Markdown：output/人生设计蓝图_用户名_日期.md（本地可读、可复制、可版本控制）
    ③ 封存时间胶囊：output/capsules/LD-YYMM-XXXX.json
-   ④ 下 30 天 / 90 天两次回信调度（调用 schedule-creator）
+   ④ 生成日历提醒文件：output/capsules/LD-YYMM-XXXX.ics（用户双击导入 Google/Apple/Outlook）
+   ⑤ 生成时间胶囊信件网页：output/capsules/LD-YYMM-XXXX-letter.html（带日期封印，30/90天后自动解锁）
 5. 双击 HTML 文件在浏览器中打开
 ```
 
 **快速预览（不需要真实对话数据）：**
 ```bash
 python3 scripts/report_generator.py --demo
-# → 生成 output/demo-report.html，可双击打开查看效果（demo 模式不封存胶囊、不下调度）
+# → 生成 output/demo-report.html，可双击打开查看效果（demo 模式不封存胶囊）
 ```
 
 ### 6.6b 章节题记（AI 必填，共鸣感的最重要来源）
@@ -856,26 +857,27 @@ python3 scripts/report_generator.py --demo
 
 ### 6.8 30 天 / 90 天定时触发的保证机制
 
-**前提：只有用户在 Phase 5 确认封存胶囊后（`"capsule_confirmed": true`），才会触发以下流程。** 如果用户拒绝，跳过本节，报告照常生成但不封存胶囊、不下调度。
+**前提：只有用户在 Phase 5 确认封存胶囊后（`"capsule_confirmed": true`），才会触发以下流程。** 如果用户拒绝，跳过本节，报告照常生成但不封存胶囊。
 
-`report_generator.py` 在生成蓝图时，检测到 `capsule_confirmed: true`，会调 `schedule-creator` 下两条调度：
+**新机制（v3.0+）：自包含的 ICS 日历提醒 + 日期封印信件**
 
-- **30 天后触发**：query 里带 `[life-designer 时间胶囊回信] phase=d30 capsule_id=LD-XXX payload=<JSON>`
-- **90 天后触发**：同上，phase=d90
+`report_generator.py` 在生成蓝图时，检测到 `capsule_confirmed: true`，调用 `generate_capsule_reminders()` 生成两个文件：
 
-到点时平台 scheduler 会把这条 query 送回来拉起本 skill。skill 顶部的**"零、Query 路由"**段落会识别到标记，走回信分支。
+1. **ICS 日历文件**（`LD-XXX.ics`）：包含两个 VEVENT（30天/90天），每个附带 VALARM 提前 1 天提醒 + 当天提醒。用户双击文件即可导入 Google Calendar / Apple Calendar / Outlook，到时间日历自动弹通知。
+2. **信件网页**（`LD-XXX-letter.html`）：自包含的 HTML 文件，内嵌胶囊内容（base64 编码）和 JS 日期锁。打开时 JS 检查当前日期：未到 30 天显示 🔒 封印界面（含倒计时），到期后解锁显示信件全文。90 天的信在 90 天后才解锁。
 
-**冗余设计（保证 30 天后一定能触发）：**
+**这个方案替代了之前的 `schedule-creator` 外部依赖**——不再需要 skill 被定时拉起，用户完全自主，文件可以在任何设备上打开。
+
+**冗余设计（保证 30 天后一定能读信）：**
 
 1. **本地文件**：`output/capsules/LD-XXX.json` — skill 目录内的胶囊原文件
-2. **调度 payload**：完整胶囊字段以 JSON 字符串嵌在 schedule 的 query 里 — 即便本地文件被删，query 里也能恢复全部字段
-3. **HTML 内嵌**（可选增强）：报告 HTML 里以 `<script type="application/json" id="capsule">` 隐藏一份 — 用户把 HTML 转移到任何地方都不会丢
-
-**如果 schedule-creator 在脚本环境里不可直接调用**（例如 skill 沙箱里没有 CLI），脚本会把待下的调度写到 `output/capsules/LD-XXX.pending_schedules.json`，你（主 agent）需要读取这个文件，把里面的 `cmd` 转换成对 `schedule-creator` skill 的正式调用，替用户把两条调度下下去。
+2. **ICS 日历**：导入用户的日常日历，日常使用时自然会看到提醒
+3. **HTML 内嵌**：信件网页自包含全部数据，不依赖任何外部资源，转移到任何设备都能打开
+4. **报告 HTML**：蓝图报告中也内嵌一份胶囊摘要
 
 **对话结束时（用户已确认封存胶囊后）你必须告诉用户：**
 
-> 胶囊已经封好了。30 天、90 天后各有一封信——是**那个下午的你**写给**未来的你**的，不是我写的。到点自然会来。你只需要打开的时候，把它当一封老朋友的信读就好。
+> 胶囊已经封好了。我给你生成了一个日历文件和一个信件网页——双击日历文件导入你的日历，30 天、90 天后它会提醒你回来。打开那个网页，没到时间它会自己锁着；到了时间，封印会解开。是**那个下午的你**写给**未来的你**的，不是我写的。
 
 **禁止说：** "我会提醒你"、"到时候我们再聊"、"届时会推送" — 这些说法把"信"降格成"提醒"，破坏仪式感。
 
